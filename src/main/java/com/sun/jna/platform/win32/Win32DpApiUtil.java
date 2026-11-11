@@ -104,7 +104,7 @@ public class Win32DpApiUtil {
 			//
 			final File fileOutput = new File(getParentFile(f), String.join(".", getName(f), "cryptProtectData"));
 			//
-			testAndAccept((a, b) -> a != null && a.exists() && a.isFile() && b != null, fileOutput,
+			testAndAccept((a, b) -> b != null, fileOutput,
 					testAndApply(Objects::nonNull,
 							testAndApply(a -> a != null && a.exists() && a.isFile() && isWindows(), f,
 									FileUtils::readFileToByteArray, null),
