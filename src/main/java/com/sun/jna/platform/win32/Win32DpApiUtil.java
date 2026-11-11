@@ -53,11 +53,20 @@ public class Win32DpApiUtil {
 		//
 		if (Objects.equals(action, "cryptProtectData")) {
 			//
-			info(LOG,
-					testAndApply(Objects::nonNull,
-							testAndApply(Objects::nonNull, getBytes(input), Crypt32Util::cryptProtectData, null),
-							x -> encodeToString(Base64.getEncoder(), x), null));
+			final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), "base64");
 			//
+			final byte[] bs = testAndApply(Objects::nonNull, getBytes(input), Crypt32Util::cryptProtectData, null);
+			//
+			if (Objects.equals(encoding, "base64")) {
+				//
+				info(LOG, testAndApply(Objects::nonNull, bs, x -> encodeToString(Base64.getEncoder(), x), null));
+				//
+			} else {
+				//
+				throw new RuntimeException(encoding);
+				//
+			} // if
+				//
 		} else if (Objects.equals(action, "cryptUnprotectData")) {
 			//
 			final String encoding = get(map, "encoding");
