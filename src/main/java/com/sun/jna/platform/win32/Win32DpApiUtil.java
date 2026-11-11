@@ -38,6 +38,8 @@ public class Win32DpApiUtil {
 
 	private static final String VALUE = "value";
 
+	private static final String BASE64 = "base64";
+
 	public static void main(final String[] args) throws IOException {
 		//
 		if (!Objects.equals(getName(getClass(FileSystems.getDefault())), "sun.nio.fs.WindowsFileSystem")) {
@@ -62,7 +64,7 @@ public class Win32DpApiUtil {
 		//
 		if (Objects.equals(action, "cryptProtectData")) {
 			//
-			final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), "base64");
+			final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
 			//
 			byte[] bs = null;
 			//
@@ -70,7 +72,7 @@ public class Win32DpApiUtil {
 				//
 				bs = testAndApply(Objects::nonNull, getBytes(input), Crypt32Util::cryptProtectData, null);
 				//
-				if (Objects.equals(encoding, "base64")) {
+				if (Objects.equals(encoding, BASE64)) {
 					//
 					info(LOG, testAndApply(Objects::nonNull, bs, x -> encodeToString(Base64.getEncoder(), x), null));
 					//
@@ -108,7 +110,7 @@ public class Win32DpApiUtil {
 			//
 			if (containsKeyInput) {
 				//
-				if (Objects.equals(encoding, "base64")) {
+				if (Objects.equals(encoding, BASE64)) {
 					//
 					bs = testAndApply(Objects::nonNull, input, x -> decode(Base64.getDecoder(), x), null);
 					//
