@@ -56,76 +56,14 @@ public class Win32DpApiUtil {
 		//
 		final String action = get(map, "action");
 		//
-		final String input = get(map, "input");
-		//
-		final String file = get(map, "file");
-		//
-		final boolean containsKeyInput = containsKey(map, "input");
-		//
-		final boolean containsKeyFile = containsKey(map, "file");
-		//
-		final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
-		//
-		final String fileNameSuffix = ".cryptProtectData";
-		//
 		if (Objects.equals(action, "cryptProtectData")) {
 			//
 			cryptProtectData(map);
 			//
 		} else if (Objects.equals(action, "cryptUnprotectData")) {
 			//
-			byte[] bs = null;
+			cryptUnprotectData(map);
 			//
-			if (containsKeyInput) {
-				//
-				if (Objects.equals(encoding, BASE64)) {
-					//
-					bs = testAndApply(Objects::nonNull, input, x -> decode(Base64.getDecoder(), x), null);
-					//
-				} else {
-					//
-					throw new RuntimeException(encoding);
-					//
-				} // if
-					//
-				info(LOG, testAndApply(Objects::nonNull,
-						testAndApply(Objects::nonNull, bs, Crypt32Util::cryptUnprotectData, null), String::new, null));
-				//
-			} else if (containsKeyFile) {
-				//
-				final File f = testAndApply(Objects::nonNull, file, File::new, null);
-				//
-				info(LOG, "input ={}", getAbsolutePath(f));
-				//
-				File fileOutput = null;
-				//
-				final String name = getName(f);
-				//
-				final File parentFile = getParentFile(f);
-				//
-				if (endsWith(name, fileNameSuffix)) {
-					//
-					fileOutput = new File(parentFile, StringUtils.substringBefore(file, fileNameSuffix));
-					//
-				} else {
-					//
-					fileOutput = new File(parentFile, name + ".cryptUnprotectData");
-					//
-				} // if
-					//
-				FileUtils.writeByteArrayToFile(fileOutput,
-						testAndApply(Objects::nonNull,
-								FileUtils.readFileToByteArray(testAndApply(Objects::nonNull, file, File::new, null)),
-								Crypt32Util::cryptUnprotectData, null));
-				//
-				info(LOG, "output={}", getAbsolutePath(fileOutput));
-				//
-			} else {
-				//
-				throw new RuntimeException("Please speicfy input or file");
-				//
-			} // if
-				//
 		} else {
 			//
 			throw new RuntimeException(action);
@@ -172,6 +110,72 @@ public class Win32DpApiUtil {
 									FileUtils::readFileToByteArray, null),
 							Crypt32Util::cryptProtectData, null),
 					FileUtils::writeByteArrayToFile);
+			//
+			info(LOG, "output={}", getAbsolutePath(fileOutput));
+			//
+		} else {
+			//
+			throw new RuntimeException("Please speicfy input or file");
+			//
+		} // if
+			//
+	}
+
+	private static void cryptUnprotectData(final Map<String, String> map) throws IOException {
+		//
+		byte[] bs = null;
+		//
+		final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
+		//
+		if (containsKey(map, "input")) {
+			//
+			if (Objects.equals(encoding, BASE64)) {
+				//
+				bs = testAndApply(Objects::nonNull, get(map, "input"), x -> decode(Base64.getDecoder(), x), null);
+				//
+			} else {
+				//
+				throw new RuntimeException(encoding);
+				//
+			} // if
+				//
+			info(LOG, testAndApply(Objects::nonNull,
+					testAndApply(Objects::nonNull, bs, Crypt32Util::cryptUnprotectData, null), String::new, null));
+			//
+		} else if (containsKey(map, "file")) {
+			//
+			final String file = get(map, "file");
+			//
+			final File f = testAndApply(Objects::nonNull, file, File::new, null);
+			//
+			info(LOG, "input ={}", getAbsolutePath(f));
+			//
+			File fileOutput = null;
+			//
+			final String name = getName(f);
+			//
+			final File parentFile = getParentFile(f);
+			//
+			final String fileNameSuffix = ".cryptProtectData";
+			//
+			if (endsWith(name, fileNameSuffix)) {
+				//
+				fileOutput = new File(parentFile, StringUtils.substringBefore(file, fileNameSuffix));
+				//
+			} else {
+				//
+				fileOutput = new File(parentFile, name + ".cryptUnprotectData");
+				//
+			} // if
+				//
+			testAndAccept((a, b) -> b != null, fileOutput,
+					testAndApply(Objects::nonNull,
+							testAndApply(a -> a != null && a.exists() && a.isFile(),
+									testAndApply(Objects::nonNull, file, File::new, null),
+									FileUtils::readFileToByteArray, null),
+							Crypt32Util::cryptUnprotectData, null)
+
+					, FileUtils::writeByteArrayToFile);
 			//
 			info(LOG, "output={}", getAbsolutePath(fileOutput));
 			//

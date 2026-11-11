@@ -43,7 +43,7 @@ class Win32DpApiUtilTest {
 	private static Method METHOD_GET_NAME_MEMBER, METHOD_GET_NAME_FILE, METHOD_GET_CLASS, METHOD_DECODE,
 			METHOD_ENCODE_TO_STRING, METHOD_GET_BYTES, METHOD_TO_MAP, METHOD_COLLECT, METHOD_GET_ABSOLUTE_PATH,
 			METHOD_ENDS_WITH, METHOD_CONTAINS_KEY, METHOD_GET_PARENT_FILE, METHOD_CRYPT_PROTECT_DATA,
-			METHOD_TEST_AND_ACCEPT = null;
+			METHOD_CRYPT_UNPROTECT_DATA, METHOD_TEST_AND_ACCEPT = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -76,6 +76,8 @@ class Win32DpApiUtilTest {
 		(METHOD_GET_PARENT_FILE = clz.getDeclaredMethod("getParentFile", File.class)).setAccessible(true);
 		//
 		(METHOD_CRYPT_PROTECT_DATA = clz.getDeclaredMethod("cryptProtectData", Map.class)).setAccessible(true);
+		//
+		(METHOD_CRYPT_UNPROTECT_DATA = clz.getDeclaredMethod("cryptUnprotectData", Map.class)).setAccessible(true);
 		//
 		(METHOD_TEST_AND_ACCEPT = clz.getDeclaredMethod("testAndAccept", BiPredicate.class, Object.class, Object.class,
 				FailableBiConsumer.class)).setAccessible(true);
@@ -203,7 +205,7 @@ class Win32DpApiUtilTest {
 			//
 			toString = Objects.toString(m);
 			//
-			if (Boolean.logicalAnd(Objects.equals(getName(m), "cryptProtectData"),
+			if (Boolean.logicalAnd(contains(Arrays.asList("cryptProtectData", "cryptUnprotectData"), getName(m)),
 					Arrays.equals(m.getParameterTypes(), new Class<?>[] { Map.class }))) {
 				//
 				final Method m1 = m;
@@ -482,6 +484,15 @@ class Win32DpApiUtilTest {
 		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, Collections.singletonMap("file", "")));
 		//
 		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, Collections.singletonMap("file", "pom.xml")));
+		//
+	}
+
+	@Test
+	void testCryptUnprotectData() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertNull(invoke(METHOD_CRYPT_UNPROTECT_DATA, null, Collections.singletonMap("file", null)));
+		//
+		Assert.assertNull(invoke(METHOD_CRYPT_UNPROTECT_DATA, null, Collections.singletonMap("file", "")));
 		//
 	}
 
