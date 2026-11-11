@@ -40,7 +40,7 @@ class Win32DpApiUtilTest {
 
 	private static Method METHOD_GET_NAME_MEMBER, METHOD_GET_NAME_FILE, METHOD_GET_CLASS, METHOD_DECODE,
 			METHOD_ENCODE_TO_STRING, METHOD_GET_BYTES, METHOD_TO_MAP, METHOD_COLLECT, METHOD_GET_ABSOLUTE_PATH,
-			METHOD_ENDS_WITH, METHOD_CONTAINS_KEY = null;
+			METHOD_ENDS_WITH, METHOD_CONTAINS_KEY, METHOD_GET_PARENT_FILE = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -69,6 +69,8 @@ class Win32DpApiUtilTest {
 		(METHOD_ENDS_WITH = clz.getDeclaredMethod("endsWith", String.class, String.class)).setAccessible(true);
 		//
 		(METHOD_CONTAINS_KEY = clz.getDeclaredMethod("containsKey", Map.class, Object.class)).setAccessible(true);
+		//
+		(METHOD_GET_PARENT_FILE = clz.getDeclaredMethod("getParentFile", File.class)).setAccessible(true);
 		//
 	}
 
@@ -443,4 +445,10 @@ class Win32DpApiUtilTest {
 		//
 	}
 
+	@Test
+	void testGetParentFile() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertNull(invoke(METHOD_GET_PARENT_FILE, null, new File(".")));
+		//
+	}
 }

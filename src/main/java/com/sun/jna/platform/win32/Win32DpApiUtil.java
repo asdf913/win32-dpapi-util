@@ -88,8 +88,7 @@ public class Win32DpApiUtil {
 				//
 				info(LOG, "input ={}", getAbsolutePath(f));
 				//
-				final File fileOutput = new File(f != null ? f.getParentFile() : null,
-						getName(f) + ".cryptProtectData");
+				final File fileOutput = new File(getParentFile(f), getName(f) + ".cryptProtectData");
 				//
 				FileUtils.writeByteArrayToFile(fileOutput, testAndApply(Objects::nonNull,
 						FileUtils.readFileToByteArray(f), Crypt32Util::cryptProtectData, null));
@@ -131,7 +130,7 @@ public class Win32DpApiUtil {
 				//
 				final String name = getName(f);
 				//
-				final File parentFile = f != null ? f.getParentFile() : null;
+				final File parentFile = getParentFile(f);
 				//
 				if (endsWith(name, ".cryptProtectData")) {
 					//
@@ -162,6 +161,10 @@ public class Win32DpApiUtil {
 			//
 		} // if
 			//
+	}
+
+	private static File getParentFile(final File instance) {
+		return instance != null && instance.getPath() != null ? instance.getParentFile() : null;
 	}
 
 	private static String getAbsolutePath(final File instance) {
