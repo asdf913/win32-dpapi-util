@@ -1,5 +1,6 @@
 package com.sun.jna.platform.win32;
 
+import java.io.File;
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
@@ -37,15 +38,18 @@ import io.github.toolfactory.narcissus.Narcissus;
 
 class Win32DpApiUtilTest {
 
-	private static Method METHOD_GET_NAME, METHOD_GET_CLASS, METHOD_DECODE, METHOD_ENCODE_TO_STRING, METHOD_GET_BYTES,
-			METHOD_TO_MAP, METHOD_COLLECT = null;
+	private static Method METHOD_GET_NAME_MEMBER, METHOD_GET_NAME_FILE, METHOD_GET_CLASS, METHOD_DECODE,
+			METHOD_ENCODE_TO_STRING, METHOD_GET_BYTES, METHOD_TO_MAP, METHOD_COLLECT, METHOD_GET_ABSOLUTE_PATH,
+			METHOD_ENDS_WITH, METHOD_CONTAINS_KEY = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
 		//
 		final Class<?> clz = Win32DpApiUtil.class;
 		//
-		(METHOD_GET_NAME = clz.getDeclaredMethod("getName", Member.class)).setAccessible(true);
+		(METHOD_GET_NAME_MEMBER = clz.getDeclaredMethod("getName", Member.class)).setAccessible(true);
+		//
+		(METHOD_GET_NAME_FILE = clz.getDeclaredMethod("getName", File.class)).setAccessible(true);
 		//
 		(METHOD_GET_CLASS = clz.getDeclaredMethod("getClass", Object.class)).setAccessible(true);
 		//
@@ -60,11 +64,17 @@ class Win32DpApiUtilTest {
 		//
 		(METHOD_COLLECT = clz.getDeclaredMethod("collect", Stream.class, Collector.class)).setAccessible(true);
 		//
+		(METHOD_GET_ABSOLUTE_PATH = clz.getDeclaredMethod("getAbsolutePath", File.class)).setAccessible(true);
+		//
+		(METHOD_ENDS_WITH = clz.getDeclaredMethod("endsWith", String.class, String.class)).setAccessible(true);
+		//
+		(METHOD_CONTAINS_KEY = clz.getDeclaredMethod("containsKey", Map.class, Object.class)).setAccessible(true);
+		//
 	}
 
 	private static class IH implements InvocationHandler {
 
-		private Boolean test = null;
+		private Boolean test, containsKey = null;
 
 		@Override
 		public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
@@ -81,10 +91,18 @@ class Win32DpApiUtilTest {
 				//
 				return null;
 				//
-			} else if (proxy instanceof Map && contains(Arrays.asList("get", "put"), name)) {
+			} else if (proxy instanceof Map) {
 				//
-				return null;
-				//
+				if (contains(Arrays.asList("get", "put"), name)) {
+					//
+					return null;
+					//
+				} else if (Objects.equals(name, "containsKey")) {
+					//
+					return containsKey;
+					//
+				} // if
+					//
 			} else if (proxy instanceof Predicate && Objects.equals(name, "test")) {
 				//
 				return test;
@@ -132,7 +150,7 @@ class Win32DpApiUtilTest {
 
 	private static String getName(final Member instance) throws Throwable {
 		try {
-			final Object obj = invoke(METHOD_GET_NAME, null, instance);
+			final Object obj = invoke(METHOD_GET_NAME_MEMBER, null, instance);
 			if (obj == null) {
 				return null;
 			} else if (obj instanceof String) {
@@ -388,6 +406,40 @@ class Win32DpApiUtilTest {
 		//
 		Assert.assertNull(invoke(METHOD_COLLECT, null,
 				Reflection.newProxy(Stream.class, ObjectUtils.getIfNull(ih, IH::new)), null));
+		//
+	}
+
+	@Test
+	void testGetAbsolutePath() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertNotNull(invoke(METHOD_GET_ABSOLUTE_PATH, null, new File(".")));
+		//
+	}
+
+	@Test
+	void testEndsWith() throws IllegalAccessException, InvocationTargetException {
+		//
+		final String empty = "";
+		//
+		Assert.assertEquals(invoke(METHOD_ENDS_WITH, null, empty, null), Boolean.FALSE);
+		//
+		Assert.assertEquals(invoke(METHOD_ENDS_WITH, null, empty, empty), Boolean.TRUE);
+		//
+		Assert.assertEquals(invoke(METHOD_ENDS_WITH, null, empty, Integer.toString(1)), Boolean.FALSE);
+		//
+	}
+
+	@Test
+	void testContainsKey() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertEquals(invoke(METHOD_CONTAINS_KEY, null, Collections.emptyMap(), null), Boolean.FALSE);
+		//
+	}
+
+	@Test
+	void testGetName() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertNotNull(invoke(METHOD_GET_NAME_FILE, null, new File(".")));
 		//
 	}
 

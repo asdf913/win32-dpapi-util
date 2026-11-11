@@ -1,5 +1,7 @@
 package com.sun.jna.platform.win32;
 
+import java.io.File;
+import java.io.IOException;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Proxy;
@@ -19,6 +21,7 @@ import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
 import org.apache.commons.collections4.IterableUtils;
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
@@ -35,7 +38,7 @@ public class Win32DpApiUtil {
 
 	private static final String VALUE = "value";
 
-	public static void main(final String[] args) {
+	public static void main(final String[] args) throws IOException {
 		//
 		if (!Objects.equals(getName(getClass(FileSystems.getDefault())), "sun.nio.fs.WindowsFileSystem")) {
 			//
@@ -51,19 +54,49 @@ public class Win32DpApiUtil {
 		//
 		final String input = get(map, "input");
 		//
+		final String file = get(map, "file");
+		//
+		final boolean containsKeyInput = containsKey(map, "input");
+		//
+		final boolean containsKeyFile = containsKey(map, "file");
+		//
 		if (Objects.equals(action, "cryptProtectData")) {
 			//
 			final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), "base64");
 			//
-			final byte[] bs = testAndApply(Objects::nonNull, getBytes(input), Crypt32Util::cryptProtectData, null);
+			byte[] bs = null;
 			//
-			if (Objects.equals(encoding, "base64")) {
+			if (containsKeyInput) {
 				//
-				info(LOG, testAndApply(Objects::nonNull, bs, x -> encodeToString(Base64.getEncoder(), x), null));
+				bs = testAndApply(Objects::nonNull, getBytes(input), Crypt32Util::cryptProtectData, null);
+				//
+				if (Objects.equals(encoding, "base64")) {
+					//
+					info(LOG, testAndApply(Objects::nonNull, bs, x -> encodeToString(Base64.getEncoder(), x), null));
+					//
+				} else {
+					//
+					throw new RuntimeException(encoding);
+					//
+				} // if
+					//
+			} else if (containsKeyFile) {
+				//
+				final File f = testAndApply(Objects::nonNull, file, File::new, null);
+				//
+				info(LOG, "input ={}", getAbsolutePath(f));
+				//
+				final File fileOutput = new File(f != null ? f.getParentFile() : null,
+						getName(f) + ".cryptProtectData");
+				//
+				FileUtils.writeByteArrayToFile(fileOutput, testAndApply(Objects::nonNull,
+						FileUtils.readFileToByteArray(f), Crypt32Util::cryptProtectData, null));
+				//
+				info(LOG, "output={}", getAbsolutePath(fileOutput));
 				//
 			} else {
 				//
-				throw new RuntimeException(encoding);
+				throw new RuntimeException("Please speicfy input or file");
 				//
 			} // if
 				//
@@ -73,19 +106,56 @@ public class Win32DpApiUtil {
 			//
 			byte[] bs = null;
 			//
-			if (Objects.equals(encoding, "base64")) {
+			if (containsKeyInput) {
 				//
-				bs = testAndApply(Objects::nonNull, input, x -> decode(Base64.getDecoder(), x), null);
+				if (Objects.equals(encoding, "base64")) {
+					//
+					bs = testAndApply(Objects::nonNull, input, x -> decode(Base64.getDecoder(), x), null);
+					//
+				} else {
+					//
+					throw new RuntimeException(encoding);
+					//
+				} // if
+					//
+				info(LOG, testAndApply(Objects::nonNull,
+						testAndApply(Objects::nonNull, bs, Crypt32Util::cryptUnprotectData, null), String::new, null));
+				//
+			} else if (containsKeyFile) {
+				//
+				final File f = testAndApply(Objects::nonNull, file, File::new, null);
+				//
+				info(LOG, "input ={}", getAbsolutePath(f));
+				//
+				File fileOutput = null;
+				//
+				final String name = getName(f);
+				//
+				final File parentFile = f != null ? f.getParentFile() : null;
+				//
+				if (endsWith(name, ".cryptProtectData")) {
+					//
+					fileOutput = new File(parentFile, StringUtils.substringBefore(file, ".cryptProtectData"));
+					//
+				} else {
+					//
+					fileOutput = new File(parentFile, name + ".cryptUnprotectData");
+					//
+				} // if
+					//
+				FileUtils.writeByteArrayToFile(fileOutput,
+						testAndApply(Objects::nonNull,
+								FileUtils.readFileToByteArray(testAndApply(Objects::nonNull, file, File::new, null)),
+								Crypt32Util::cryptUnprotectData, null));
+				//
+				info(LOG, "output={}", getAbsolutePath(fileOutput));
 				//
 			} else {
 				//
-				throw new RuntimeException(encoding);
+				throw new RuntimeException("Please speicfy input or file");
 				//
 			} // if
 				//
-			info(LOG, testAndApply(Objects::nonNull,
-					testAndApply(Objects::nonNull, bs, Crypt32Util::cryptUnprotectData, null), String::new, null));
-			//
 		} else {
 			//
 			throw new RuntimeException(action);
@@ -94,9 +164,42 @@ public class Win32DpApiUtil {
 			//
 	}
 
+	private static String getAbsolutePath(final File instance) {
+		return instance != null && instance.getPath() != null ? instance.getAbsolutePath() : null;
+	}
+
+	private static boolean endsWith(final String instance, final String suffix) {
+		//
+		if (instance == null || suffix == null) {
+			//
+			return false;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), "value")), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		return (field == null || Boolean.logicalAnd(Narcissus.getField(instance, field) != null,
+				Narcissus.getField(suffix, field) != null)) && instance.endsWith(suffix);
+		//
+	}
+
+	private static boolean containsKey(final Map<?, ?> instance, final Object key) {
+		return instance != null && instance.containsKey(key);
+	}
+
 	private static void info(final Logger instance, final String msg) {
 		if (instance != null) {
 			instance.info(msg);
+		}
+	}
+
+	private static void info(final Logger instance, final String format, final Object arg) {
+		if (instance != null) {
+			instance.info(format, arg);
 		}
 	}
 
@@ -260,6 +363,10 @@ public class Win32DpApiUtil {
 
 	private static String getName(final Member instance) {
 		return instance != null ? instance.getName() : null;
+	}
+
+	private static String getName(final File instance) {
+		return instance != null && instance.getPath() != null ? instance.getName() : null;
 	}
 
 	private static Class<?> getClass(final Object instance) {
