@@ -24,10 +24,14 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 import io.github.toolfactory.narcissus.Narcissus;
 
 public class Win32DpApiUtil {
+
+	private static final Logger LOG = LoggerFactory.getLogger(Win32DpApiUtil.class);
 
 	private static final String VALUE = "value";
 
@@ -35,7 +39,7 @@ public class Win32DpApiUtil {
 		//
 		if (!Objects.equals(getName(getClass(FileSystems.getDefault())), "sun.nio.fs.WindowsFileSystem")) {
 			//
-			System.out.println("Please run under Microsoft Windows");
+			info(LOG, "Please run under Microsoft Windows");
 			//
 			return;
 			//
@@ -49,11 +53,10 @@ public class Win32DpApiUtil {
 		//
 		if (Objects.equals(action, "cryptProtectData")) {
 			//
-			final String encodeToString = testAndApply(Objects::nonNull,
-					testAndApply(Objects::nonNull, getBytes(input), Crypt32Util::cryptProtectData, null),
-					x -> encodeToString(Base64.getEncoder(), x), null);
-			//
-			System.out.println(encodeToString);
+			info(LOG,
+					testAndApply(Objects::nonNull,
+							testAndApply(Objects::nonNull, getBytes(input), Crypt32Util::cryptProtectData, null),
+							x -> encodeToString(Base64.getEncoder(), x), null));
 			//
 		} else if (Objects.equals(action, "cryptUnprotectData")) {
 			//
@@ -71,10 +74,8 @@ public class Win32DpApiUtil {
 				//
 			} // if
 				//
-			final String string = testAndApply(Objects::nonNull,
-					testAndApply(Objects::nonNull, bs, Crypt32Util::cryptUnprotectData, null), String::new, null);
-			//
-			System.out.println(string);
+			info(LOG, testAndApply(Objects::nonNull,
+					testAndApply(Objects::nonNull, bs, Crypt32Util::cryptUnprotectData, null), String::new, null));
 			//
 		} else {
 			//
@@ -82,6 +83,12 @@ public class Win32DpApiUtil {
 			//
 		} // if
 			//
+	}
+
+	private static void info(final Logger instance, final String msg) {
+		if (instance != null) {
+			instance.info(msg);
+		}
 	}
 
 	private static byte[] decode(final Decoder instance, final String string) {
