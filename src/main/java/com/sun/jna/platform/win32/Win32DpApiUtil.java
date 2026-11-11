@@ -1,3 +1,5 @@
+package com.sun.jna.platform.win32;
+
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Proxy;
@@ -22,8 +24,6 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.tuple.Pair;
-
-import com.sun.jna.platform.win32.Crypt32Util;
 
 import io.github.toolfactory.narcissus.Narcissus;
 

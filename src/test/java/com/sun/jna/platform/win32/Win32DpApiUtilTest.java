@@ -1,3 +1,5 @@
+package com.sun.jna.platform.win32;
+
 import java.lang.reflect.Array;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
