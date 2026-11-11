@@ -64,6 +64,8 @@ public class Win32DpApiUtil {
 		//
 		final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
 		//
+		final String fileNameSuffix = ".cryptProtectData";
+		//
 		if (Objects.equals(action, "cryptProtectData")) {
 			//
 			byte[] bs = null;
@@ -88,7 +90,7 @@ public class Win32DpApiUtil {
 				//
 				info(LOG, "input ={}", getAbsolutePath(f));
 				//
-				final File fileOutput = new File(getParentFile(f), getName(f) + ".cryptProtectData");
+				final File fileOutput = new File(getParentFile(f), getName(f) + fileNameSuffix);
 				//
 				FileUtils.writeByteArrayToFile(fileOutput, testAndApply(Objects::nonNull,
 						FileUtils.readFileToByteArray(f), Crypt32Util::cryptProtectData, null));
@@ -132,9 +134,9 @@ public class Win32DpApiUtil {
 				//
 				final File parentFile = getParentFile(f);
 				//
-				if (endsWith(name, ".cryptProtectData")) {
+				if (endsWith(name, fileNameSuffix)) {
 					//
-					fileOutput = new File(parentFile, StringUtils.substringBefore(file, ".cryptProtectData"));
+					fileOutput = new File(parentFile, StringUtils.substringBefore(file, fileNameSuffix));
 					//
 				} else {
 					//
