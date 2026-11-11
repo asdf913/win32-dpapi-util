@@ -29,6 +29,8 @@ import io.github.toolfactory.narcissus.Narcissus;
 
 public class Win32DpApiUtil {
 
+	private static final String VALUE = "value";
+
 	public static void main(final String[] args) {
 		//
 		if (!Objects.equals(getName(getClass(FileSystems.getDefault())), "sun.nio.fs.WindowsFileSystem")) {
@@ -93,7 +95,7 @@ public class Win32DpApiUtil {
 		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
 				collect(filter(
 						stream(testAndApply(Objects::nonNull, getClass(string), FieldUtils::getAllFieldsList, null)),
-						f -> Objects.equals(getName(f), "value")), Collectors.toList()),
+						f -> Objects.equals(getName(f), VALUE)), Collectors.toList()),
 				x -> IterableUtils.get(x, 0), null);
 		//
 		return field == null || Narcissus.getField(string, field) != null ? instance.decode(string) : null;
@@ -115,7 +117,7 @@ public class Win32DpApiUtil {
 		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
 				collect(filter(
 						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
-						f -> Objects.equals(getName(f), "value")), Collectors.toList()),
+						f -> Objects.equals(getName(f), VALUE)), Collectors.toList()),
 				x -> IterableUtils.get(x, 0), null);
 		//
 		return field == null || Narcissus.getField(instance, field) != null ? instance.getBytes() : null;
@@ -167,7 +169,7 @@ public class Win32DpApiUtil {
 		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
 				collect(filter(
 						stream(testAndApply(Objects::nonNull, getClass(string), FieldUtils::getAllFieldsList, null)),
-						f -> Objects.equals(getName(f), "value")), Collectors.toList()),
+						f -> Objects.equals(getName(f), VALUE)), Collectors.toList()),
 				x -> IterableUtils.get(x, 0), null);
 		//
 		if (string != null && field != null && Narcissus.getField(string, field) == null) {
