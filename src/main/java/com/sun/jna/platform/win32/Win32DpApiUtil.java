@@ -42,6 +42,8 @@ public class Win32DpApiUtil {
 
 	private static final String BASE64 = "base64";
 
+	private static final String INPUT = "input";
+
 	public static void main(final String[] args) throws IOException {
 		//
 		if (!isWindows()) {
@@ -82,9 +84,9 @@ public class Win32DpApiUtil {
 		//
 		final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
 		//
-		if (containsKey(map, "input")) {
+		if (containsKey(map, INPUT)) {
 			//
-			bs = testAndApply(Objects::nonNull, getBytes(get(map, "input")), Crypt32Util::cryptProtectData, null);
+			bs = testAndApply(Objects::nonNull, getBytes(get(map, INPUT)), Crypt32Util::cryptProtectData, null);
 			//
 			if (Objects.equals(encoding, BASE64)) {
 				//
@@ -127,11 +129,11 @@ public class Win32DpApiUtil {
 		//
 		final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
 		//
-		if (containsKey(map, "input")) {
+		if (containsKey(map, INPUT)) {
 			//
 			if (Objects.equals(encoding, BASE64)) {
 				//
-				bs = testAndApply(Objects::nonNull, get(map, "input"), x -> decode(Base64.getDecoder(), x), null);
+				bs = testAndApply(Objects::nonNull, get(map, INPUT), x -> decode(Base64.getDecoder(), x), null);
 				//
 			} else {
 				//
