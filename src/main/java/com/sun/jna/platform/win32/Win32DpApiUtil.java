@@ -30,6 +30,7 @@ import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableBiConsumer;
 import org.apache.commons.lang3.function.FailableFunction;
+import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -83,15 +84,25 @@ public class Win32DpApiUtil {
 
 	private static void cryptProtectData(final Map<String, String> map) throws IOException {
 		//
-		byte[] bs = null;
-		//
 		final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
 		//
 		if (containsKey(map, INPUT)) {
 			//
-			bs = testAndApply(x -> x != null && isWindows(), getBytes(get(map, INPUT)), Crypt32Util::cryptProtectData,
-					null);
+			final byte[] input = getBytes(get(map, INPUT));
 			//
+			byte[] bs = null;
+			//
+			if (containsKey(map, "flags")) {
+				//
+				bs = testAndApply(x -> x != null && isWindows(), input,
+						x -> Crypt32Util.cryptProtectData(x, NumberUtils.toInt(get(map, "flags"))), null);
+				//
+			} else {
+				//
+				bs = testAndApply(x -> x != null && isWindows(), input, Crypt32Util::cryptProtectData, null);
+				//
+			} // if
+				//
 			if (Objects.equals(encoding, BASE64)) {
 				//
 				info(LOG, testAndApply(Objects::nonNull, bs, x -> encodeToString(Base64.getEncoder(), x), null));
@@ -114,12 +125,21 @@ public class Win32DpApiUtil {
 			//
 			final File fileOutput = new File(getParentFile(f), String.join(".", getName(f), "cryptProtectData"));
 			//
-			testAndAccept((a, b) -> b != null, fileOutput,
-					testAndApply(Objects::nonNull,
-							testAndApply(a -> a != null && a.exists() && a.isFile() && isWindows(), f,
-									FileUtils::readFileToByteArray, null),
-							Crypt32Util::cryptProtectData, null),
-					FileUtils::writeByteArrayToFile);
+			byte[] bs = testAndApply(a -> a != null && a.exists() && a.isFile() && isWindows(), f,
+					FileUtils::readFileToByteArray, null);
+			//
+			if (containsKey(map, "flags")) {
+				//
+				bs = testAndApply(x -> x != null && isWindows(), bs,
+						x -> Crypt32Util.cryptProtectData(x, NumberUtils.toInt(get(map, "flags"))), null);
+				//
+			} else {
+				//
+				bs = testAndApply(x -> x != null && isWindows(), bs, Crypt32Util::cryptProtectData, null);
+				//
+			} // if
+				//
+			testAndAccept((a, b) -> b != null, fileOutput, bs, FileUtils::writeByteArrayToFile);
 			//
 			info(LOG, "output={}", getAbsolutePath(fileOutput));
 			//
@@ -155,10 +175,18 @@ public class Win32DpApiUtil {
 				//
 			} // if
 				//
-			info(LOG,
-					testAndApply(Objects::nonNull,
-							testAndApply(x -> x != null && isWindows(), bs, Crypt32Util::cryptUnprotectData, null),
-							String::new, null));
+			if (containsKey(map, "flags")) {
+				//
+				bs = testAndApply(x -> x != null && isWindows(), bs,
+						x -> Crypt32Util.cryptUnprotectData(x, NumberUtils.toInt(get(map, "flags"))), null);
+				//
+			} else {
+				//
+				bs = testAndApply(x -> x != null && isWindows(), bs, Crypt32Util::cryptUnprotectData, null);
+				//
+			} // if
+				//
+			info(LOG, testAndApply(Objects::nonNull, bs, String::new, null));
 			//
 		} else if (containsKey(map, "file")) {
 			//
@@ -186,10 +214,20 @@ public class Win32DpApiUtil {
 				//
 			} // if
 				//
-			final byte[] bs = testAndApply(Objects::nonNull, testAndApply(a -> a != null && a.exists() && a.isFile(),
-					testAndApply(Objects::nonNull, file, File::new, null), FileUtils::readFileToByteArray, null),
-					Crypt32Util::cryptUnprotectData, null);
+			byte[] bs = testAndApply(a -> a != null && a.exists() && a.isFile(),
+					testAndApply(Objects::nonNull, file, File::new, null), FileUtils::readFileToByteArray, null);
 			//
+			if (containsKey(map, "flags")) {
+				//
+				bs = testAndApply(x -> x != null && isWindows(), bs,
+						x -> Crypt32Util.cryptUnprotectData(x, NumberUtils.toInt(get(map, "flags"))), null);
+				//
+			} else {
+				//
+				bs = testAndApply(x -> x != null && isWindows(), bs, Crypt32Util::cryptUnprotectData, null);
+				//
+			} // if
+				//
 			if (!Arrays.equals(testAndApply(x -> x != null && x.exists() && x.isFile(), fileOutput,
 					FileUtils::readFileToByteArray, null), bs)) {
 				//
