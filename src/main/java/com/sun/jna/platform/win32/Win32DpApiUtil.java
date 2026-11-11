@@ -146,7 +146,7 @@ public class Win32DpApiUtil {
 				//
 			} else if (Objects.equals(encoding, "hex")) {
 				//
-				bs = testAndApply(Objects::nonNull, input, x -> Hex.decodeHex(x), null);
+				bs = testAndApply(Objects::nonNull, input, Hex::decodeHex, null);
 				//
 			} else {
 				//
