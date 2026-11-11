@@ -125,7 +125,7 @@ public class Win32DpApiUtil {
 			//
 			final File fileOutput = new File(getParentFile(f), String.join(".", getName(f), "cryptProtectData"));
 			//
-			byte[] bs = testAndApply(a -> exists(a) && isFile(a) && isWindows(), f, FileUtils::readFileToByteArray,
+			byte[] bs = testAndApply(a -> and(a, Win32DpApiUtil::exists, Win32DpApiUtil::isFile) && isWindows(), f, FileUtils::readFileToByteArray,
 					null);
 			//
 			if (containsKey(map, "flags")) {
@@ -214,8 +214,8 @@ public class Win32DpApiUtil {
 				//
 			} // if
 				//
-			byte[] bs = testAndApply(a -> exists(a) && isFile(a), testAndApply(Objects::nonNull, file, File::new, null),
-					FileUtils::readFileToByteArray, null);
+			byte[] bs = testAndApply(a -> and(a, Win32DpApiUtil::exists, Win32DpApiUtil::isFile),
+					testAndApply(Objects::nonNull, file, File::new, null), FileUtils::readFileToByteArray, null);
 			//
 			if (containsKey(map, "flags")) {
 				//
@@ -228,8 +228,8 @@ public class Win32DpApiUtil {
 				//
 			} // if
 				//
-			if (!Arrays.equals(
-					testAndApply(x -> exists(x) && isFile(x), fileOutput, FileUtils::readFileToByteArray, null), bs)) {
+			if (!Arrays.equals(testAndApply(x -> and(x, Win32DpApiUtil::exists, Win32DpApiUtil::isFile), fileOutput,
+					FileUtils::readFileToByteArray, null), bs)) {
 				//
 				FileUtils.writeByteArrayToFile(fileOutput, bs);
 				//
@@ -243,6 +243,10 @@ public class Win32DpApiUtil {
 			//
 		} // if
 			//
+	}
+
+	private static <T> boolean and(final T value, final Predicate<T> a, final Predicate<T> b) {
+		return test(a, value) && test(b, value);
 	}
 
 	private static boolean isFile(final File instance) {
