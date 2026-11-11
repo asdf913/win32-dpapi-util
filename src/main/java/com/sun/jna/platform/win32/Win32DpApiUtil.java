@@ -14,7 +14,7 @@ import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
@@ -25,6 +25,8 @@ import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.apache.commons.lang3.function.FailableBiConsumer;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.tuple.Pair;
 import org.slf4j.Logger;
@@ -42,7 +44,7 @@ public class Win32DpApiUtil {
 
 	public static void main(final String[] args) throws IOException {
 		//
-		if (!Objects.equals(getName(getClass(FileSystems.getDefault())), "sun.nio.fs.WindowsFileSystem")) {
+		if (!isWindows()) {
 			//
 			info(LOG, "Please run under Microsoft Windows");
 			//
@@ -68,41 +70,8 @@ public class Win32DpApiUtil {
 		//
 		if (Objects.equals(action, "cryptProtectData")) {
 			//
-			byte[] bs = null;
+			cryptProtectData(map);
 			//
-			if (containsKeyInput) {
-				//
-				bs = testAndApply(Objects::nonNull, getBytes(input), Crypt32Util::cryptProtectData, null);
-				//
-				if (Objects.equals(encoding, BASE64)) {
-					//
-					info(LOG, testAndApply(Objects::nonNull, bs, x -> encodeToString(Base64.getEncoder(), x), null));
-					//
-				} else {
-					//
-					throw new RuntimeException(encoding);
-					//
-				} // if
-					//
-			} else if (containsKeyFile) {
-				//
-				final File f = testAndApply(Objects::nonNull, file, File::new, null);
-				//
-				info(LOG, "input ={}", getAbsolutePath(f));
-				//
-				final File fileOutput = new File(getParentFile(f), getName(f) + fileNameSuffix);
-				//
-				FileUtils.writeByteArrayToFile(fileOutput, testAndApply(Objects::nonNull,
-						FileUtils.readFileToByteArray(f), Crypt32Util::cryptProtectData, null));
-				//
-				info(LOG, "output={}", getAbsolutePath(fileOutput));
-				//
-			} else {
-				//
-				throw new RuntimeException("Please speicfy input or file");
-				//
-			} // if
-				//
 		} else if (Objects.equals(action, "cryptUnprotectData")) {
 			//
 			byte[] bs = null;
@@ -163,6 +132,62 @@ public class Win32DpApiUtil {
 			//
 		} // if
 			//
+	}
+
+	private static boolean isWindows() {
+		return Objects.equals(getName(getClass(FileSystems.getDefault())), "sun.nio.fs.WindowsFileSystem");
+	}
+
+	private static void cryptProtectData(final Map<String, String> map) throws IOException {
+		//
+		byte[] bs = null;
+		//
+		final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
+		//
+		if (containsKey(map, "input")) {
+			//
+			bs = testAndApply(Objects::nonNull, getBytes(get(map, "input")), Crypt32Util::cryptProtectData, null);
+			//
+			if (Objects.equals(encoding, BASE64)) {
+				//
+				info(LOG, testAndApply(Objects::nonNull, bs, x -> encodeToString(Base64.getEncoder(), x), null));
+				//
+			} else {
+				//
+				throw new RuntimeException(encoding);
+				//
+			} // if
+				//
+		} else if (containsKey(map, "file")) {
+			//
+			final File f = testAndApply(Objects::nonNull, get(map, "file"), File::new, null);
+			//
+			info(LOG, "input ={}", getAbsolutePath(f));
+			//
+			final File fileOutput = new File(getParentFile(f), String.join(".", getName(f), "cryptProtectData"));
+			//
+			testAndAccept((a, b) -> a != null && a.exists() && a.isFile() && b != null, fileOutput,
+					testAndApply(Objects::nonNull,
+							testAndApply(a -> a != null && a.exists() && a.isFile() && isWindows(), f,
+									FileUtils::readFileToByteArray, null),
+							Crypt32Util::cryptProtectData, null),
+					FileUtils::writeByteArrayToFile);
+			//
+			info(LOG, "output={}", getAbsolutePath(fileOutput));
+			//
+		} else {
+			//
+			throw new RuntimeException("Please speicfy input or file");
+			//
+		} // if
+			//
+	}
+
+	private static <T, U, E extends Exception> void testAndAccept(final BiPredicate<T, U> predicate, final T t,
+			final U u, final FailableBiConsumer<T, U, E> consumer) throws E {
+		if (predicate != null && predicate.test(t, u) && consumer != null) {
+			consumer.accept(t, u);
+		}
 	}
 
 	private static File getParentFile(final File instance) {
@@ -346,7 +371,7 @@ public class Win32DpApiUtil {
 	}
 
 	private static <T, R, E extends Throwable> R testAndApply(final Predicate<T> predicate, final T value,
-			final Function<T, R> functionTrue, final Function<T, R> functionFalse) throws E {
+			final FailableFunction<T, R, E> functionTrue, final FailableFunction<T, R, E> functionFalse) throws E {
 		return test(predicate, value) ? apply(functionTrue, value) : apply(functionFalse, value);
 	}
 
@@ -354,7 +379,8 @@ public class Win32DpApiUtil {
 		return instance != null && instance.test(value);
 	}
 
-	private static <T, R> R apply(final Function<T, R> instance, final T value) {
+	private static <T, R, E extends Throwable> R apply(final FailableFunction<T, R, E> instance, final T value)
+			throws E {
 		return instance != null ? instance.apply(value) : null;
 	}
 

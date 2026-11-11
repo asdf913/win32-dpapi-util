@@ -18,7 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
-import java.util.function.Function;
+import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
@@ -26,6 +26,8 @@ import java.util.stream.Stream;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
+import org.apache.commons.lang3.function.FailableBiConsumer;
+import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.testng.Assert;
 import org.testng.annotations.BeforeClass;
@@ -40,7 +42,8 @@ class Win32DpApiUtilTest {
 
 	private static Method METHOD_GET_NAME_MEMBER, METHOD_GET_NAME_FILE, METHOD_GET_CLASS, METHOD_DECODE,
 			METHOD_ENCODE_TO_STRING, METHOD_GET_BYTES, METHOD_TO_MAP, METHOD_COLLECT, METHOD_GET_ABSOLUTE_PATH,
-			METHOD_ENDS_WITH, METHOD_CONTAINS_KEY, METHOD_GET_PARENT_FILE = null;
+			METHOD_ENDS_WITH, METHOD_CONTAINS_KEY, METHOD_GET_PARENT_FILE, METHOD_CRYPT_PROTECT_DATA,
+			METHOD_TEST_AND_ACCEPT = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -71,6 +74,11 @@ class Win32DpApiUtilTest {
 		(METHOD_CONTAINS_KEY = clz.getDeclaredMethod("containsKey", Map.class, Object.class)).setAccessible(true);
 		//
 		(METHOD_GET_PARENT_FILE = clz.getDeclaredMethod("getParentFile", File.class)).setAccessible(true);
+		//
+		(METHOD_CRYPT_PROTECT_DATA = clz.getDeclaredMethod("cryptProtectData", Map.class)).setAccessible(true);
+		//
+		(METHOD_TEST_AND_ACCEPT = clz.getDeclaredMethod("testAndAccept", BiPredicate.class, Object.class, Object.class,
+				FailableBiConsumer.class)).setAccessible(true);
 		//
 	}
 
@@ -105,7 +113,8 @@ class Win32DpApiUtilTest {
 					//
 				} // if
 					//
-			} else if (proxy instanceof Predicate && Objects.equals(name, "test")) {
+			} else if (Boolean.logicalAnd(Boolean.logicalOr(proxy instanceof Predicate, proxy instanceof BiPredicate),
+					Objects.equals(name, "test"))) {
 				//
 				return test;
 				//
@@ -113,7 +122,7 @@ class Win32DpApiUtilTest {
 				//
 				return null;
 				//
-			} else if (proxy instanceof Function && Objects.equals(name, "apply")) {
+			} else if (proxy instanceof FailableFunction && Objects.equals(name, "apply")) {
 				//
 				return null;
 				//
@@ -170,7 +179,7 @@ class Win32DpApiUtilTest {
 	}
 
 	@Test
-	void testNull() {
+	void testNull() throws Throwable {
 		//
 		final Method[] ms = Win32DpApiUtil.class.getDeclaredMethods();
 		//
@@ -194,16 +203,29 @@ class Win32DpApiUtilTest {
 			//
 			toString = Objects.toString(m);
 			//
-			result = Narcissus.invokeStaticMethod(m, os);
-			//
-			if (contains(Arrays.asList(Integer.TYPE, Boolean.TYPE), getReturnType(m))) {
+			if (Boolean.logicalAnd(Objects.equals(getName(m), "cryptProtectData"),
+					Arrays.equals(m.getParameterTypes(), new Class<?>[] { Map.class }))) {
 				//
-				Assert.assertNotNull(result, toString);
+				final Method m1 = m;
+				//
+				final Object[] os1 = os;
+				//
+				Assert.assertThrows(Throwable.class, () -> Narcissus.invokeStaticMethod(m1, os1));
 				//
 			} else {
 				//
-				Assert.assertNull(result, toString);
+				result = Narcissus.invokeStaticMethod(m, os);
 				//
+				if (contains(Arrays.asList(Integer.TYPE, Boolean.TYPE), getReturnType(m))) {
+					//
+					Assert.assertNotNull(result, toString);
+					//
+				} else {
+					//
+					Assert.assertNull(result, toString);
+					//
+				} // if
+					//
 			} // if
 				//
 		} // for
@@ -451,4 +473,30 @@ class Win32DpApiUtilTest {
 		Assert.assertNull(invoke(METHOD_GET_PARENT_FILE, null, new File(".")));
 		//
 	}
+
+	@Test
+	void testCryptProtectData() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, Collections.singletonMap("file", null)));
+		//
+		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, Collections.singletonMap("file", "")));
+		//
+		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, Collections.singletonMap("file", "pom.xml")));
+		//
+	}
+
+	@Test
+	void testTestAndAccept() throws IllegalAccessException, InvocationTargetException {
+		//
+		if ((ih = ObjectUtils.getIfNull(ih, IH::new)) != null) {
+			//
+			ih.test = Boolean.TRUE;
+			//
+		} // if
+			//
+		Assert.assertNull(
+				invoke(METHOD_TEST_AND_ACCEPT, null, Reflection.newProxy(BiPredicate.class, ih), null, null, null));
+		//
+	}
+
 }
