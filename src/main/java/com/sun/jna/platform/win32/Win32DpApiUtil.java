@@ -94,12 +94,13 @@ public class Win32DpApiUtil {
 			//
 			if (containsKey(map, "flags")) {
 				//
-				bs = testAndApply(x -> x != null && isWindows(), input,
+				bs = testAndApply(x -> Boolean.logicalAnd(x != null, isWindows()), input,
 						x -> Crypt32Util.cryptProtectData(x, NumberUtils.toInt(get(map, "flags"))), null);
 				//
 			} else {
 				//
-				bs = testAndApply(x -> x != null && isWindows(), input, Crypt32Util::cryptProtectData, null);
+				bs = testAndApply(x -> Boolean.logicalAnd(x != null, isWindows()), input, Crypt32Util::cryptProtectData,
+						null);
 				//
 			} // if
 				//
@@ -125,17 +126,18 @@ public class Win32DpApiUtil {
 			//
 			final File fileOutput = new File(getParentFile(f), String.join(".", getName(f), "cryptProtectData"));
 			//
-			byte[] bs = testAndApply(a -> and(a, Win32DpApiUtil::exists, Win32DpApiUtil::isFile) && isWindows(), f, FileUtils::readFileToByteArray,
-					null);
+			byte[] bs = testAndApply(a -> and(a, Win32DpApiUtil::exists, Win32DpApiUtil::isFile) && isWindows(), f,
+					FileUtils::readFileToByteArray, null);
 			//
 			if (containsKey(map, "flags")) {
 				//
-				bs = testAndApply(x -> x != null && isWindows(), bs,
+				bs = testAndApply(x -> Boolean.logicalAnd(x != null, isWindows()), bs,
 						x -> Crypt32Util.cryptProtectData(x, NumberUtils.toInt(get(map, "flags"))), null);
 				//
 			} else {
 				//
-				bs = testAndApply(x -> x != null && isWindows(), bs, Crypt32Util::cryptProtectData, null);
+				bs = testAndApply(x -> Boolean.logicalAnd(x != null, isWindows()), bs, Crypt32Util::cryptProtectData,
+						null);
 				//
 			} // if
 				//
@@ -177,12 +179,13 @@ public class Win32DpApiUtil {
 				//
 			if (containsKey(map, "flags")) {
 				//
-				bs = testAndApply(x -> x != null && isWindows(), bs,
+				bs = testAndApply(x -> Boolean.logicalAnd(x != null, isWindows()), bs,
 						x -> Crypt32Util.cryptUnprotectData(x, NumberUtils.toInt(get(map, "flags"))), null);
 				//
 			} else {
 				//
-				bs = testAndApply(x -> x != null && isWindows(), bs, Crypt32Util::cryptUnprotectData, null);
+				bs = testAndApply(x -> Boolean.logicalAnd(x != null, isWindows()), bs, Crypt32Util::cryptUnprotectData,
+						null);
 				//
 			} // if
 				//
@@ -219,12 +222,13 @@ public class Win32DpApiUtil {
 			//
 			if (containsKey(map, "flags")) {
 				//
-				bs = testAndApply(x -> x != null && isWindows(), bs,
+				bs = testAndApply(x -> Boolean.logicalAnd(x != null, isWindows()), bs,
 						x -> Crypt32Util.cryptUnprotectData(x, NumberUtils.toInt(get(map, "flags"))), null);
 				//
 			} else {
 				//
-				bs = testAndApply(x -> x != null && isWindows(), bs, Crypt32Util::cryptUnprotectData, null);
+				bs = testAndApply(x -> Boolean.logicalAnd(x != null, isWindows()), bs, Crypt32Util::cryptUnprotectData,
+						null);
 				//
 			} // if
 				//
