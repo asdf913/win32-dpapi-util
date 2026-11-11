@@ -12,6 +12,11 @@
 
 ## Reference
 
+<a href="https://learn.microsoft.com/en-us/windows/win32/api/dpapi">Dpapi.h header - Win32 apps | Microsoft Learn</a>
+
+<img width="704" height="882" alt="image" src="https://github.com/user-attachments/assets/b9bdf308-449d-41e3-8179-5ceb7189ea23" />
+
+
 <a href="https://learn.microsoft.com/en-us/windows/win32/api/dpapi/nf-dpapi-cryptprotectdata">CryptProtectData function (dpapi.h) - Win32 apps | Microsoft Learn</a>
 
 <a href="https://learn.microsoft.com/en-us/windows/win32/api/dpapi/nf-dpapi-cryptunprotectdata">CryptUnprotectData function (dpapi.h) - Win32 apps | Microsoft Learn</a>
