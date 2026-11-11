@@ -190,9 +190,11 @@ class Win32DpApiUtilTest {
 		//
 		Object result = null;
 		//
-		String toString = null;
+		String toString, name = null;
 		//
 		Object[] os = null;
+		//
+		Class<?>[] parameterTypes = null;
 		//
 		for (int i = 0; ms != null && i < ms.length; i++) {
 			//
@@ -206,8 +208,10 @@ class Win32DpApiUtilTest {
 			//
 			toString = Objects.toString(m);
 			//
-			if (Boolean.logicalAnd(contains(Arrays.asList("cryptProtectData", "cryptUnprotectData"), getName(m)),
-					Arrays.equals(m.getParameterTypes(), new Class<?>[] { Map.class }))) {
+			if (Boolean.logicalAnd(contains(Arrays.asList("cryptProtectData", "cryptUnprotectData"), name = getName(m)),
+					Arrays.equals(parameterTypes = m.getParameterTypes(), new Class<?>[] { Map.class }))
+					|| Boolean.logicalAnd(Objects.equals(name, "toByteArray"),
+							Arrays.equals(parameterTypes, new Class<?>[] { String.class, String.class }))) {
 				//
 				final Method m1 = m;
 				//

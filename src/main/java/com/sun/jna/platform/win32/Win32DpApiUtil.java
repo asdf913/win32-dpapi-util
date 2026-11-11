@@ -159,24 +159,8 @@ public class Win32DpApiUtil {
 		//
 		if (containsKey(map, INPUT)) {
 			//
-			byte[] bs = null;
+			byte[] bs = toByteArray(get(map, INPUT), encoding);
 			//
-			final String input = get(map, INPUT);
-			//
-			if (Objects.equals(encoding, BASE64)) {
-				//
-				bs = testAndApply(Objects::nonNull, input, x -> decode(Base64.getDecoder(), x), null);
-				//
-			} else if (Objects.equals(encoding, "hex")) {
-				//
-				bs = testAndApply(Objects::nonNull, input, Hex::decodeHex, null);
-				//
-			} else {
-				//
-				throw new RuntimeException(encoding);
-				//
-			} // if
-				//
 			if (containsKey(map, "flags")) {
 				//
 				bs = testAndApply(x -> Boolean.logicalAnd(x != null, isWindows()), bs,
@@ -247,6 +231,40 @@ public class Win32DpApiUtil {
 			//
 		} // if
 			//
+	}
+
+	private static byte[] toByteArray(final String instance, final String encoding) throws DecoderException {
+		//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), VALUE)), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		if (instance != null && field != null && Narcissus.getField(instance, field) == null) {
+			//
+			return null;
+			//
+		} // if
+			//
+		byte[] bs = null;
+		//
+		if (Objects.equals(encoding, BASE64)) {
+			//
+			bs = testAndApply(Objects::nonNull, instance, x -> decode(Base64.getDecoder(), x), null);
+			//
+		} else if (Objects.equals(encoding, "hex")) {
+			//
+			bs = testAndApply(Objects::nonNull, instance, Hex::decodeHex, null);
+			//
+		} else {
+			//
+			throw new RuntimeException(encoding);
+			//
+		} // if
+			//
+		return bs;
+		//
 	}
 
 	private static <T> boolean and(final T value, final Predicate<T> a, final Predicate<T> b) {
