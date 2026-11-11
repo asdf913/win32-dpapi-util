@@ -20,6 +20,8 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -44,7 +46,7 @@ public class Win32DpApiUtil {
 
 	private static final String INPUT = "input";
 
-	public static void main(final String[] args) throws IOException {
+	public static void main(final String[] args) throws IOException, DecoderException {
 		//
 		if (!isWindows()) {
 			//
@@ -86,11 +88,16 @@ public class Win32DpApiUtil {
 		//
 		if (containsKey(map, INPUT)) {
 			//
-			bs = testAndApply(Objects::nonNull, getBytes(get(map, INPUT)), Crypt32Util::cryptProtectData, null);
+			bs = testAndApply(x -> x != null && isWindows(), getBytes(get(map, INPUT)), Crypt32Util::cryptProtectData,
+					null);
 			//
 			if (Objects.equals(encoding, BASE64)) {
 				//
 				info(LOG, testAndApply(Objects::nonNull, bs, x -> encodeToString(Base64.getEncoder(), x), null));
+				//
+			} else if (Objects.equals(encoding, "hex")) {
+				//
+				info(LOG, testAndApply(Objects::nonNull, bs, Hex::encodeHexString, null));
 				//
 			} else {
 				//
@@ -123,7 +130,7 @@ public class Win32DpApiUtil {
 			//
 	}
 
-	private static void cryptUnprotectData(final Map<String, String> map) throws IOException {
+	private static void cryptUnprotectData(final Map<String, String> map) throws IOException, DecoderException {
 		//
 		byte[] bs = null;
 		//
@@ -131,9 +138,15 @@ public class Win32DpApiUtil {
 		//
 		if (containsKey(map, INPUT)) {
 			//
+			final String input = get(map, INPUT);
+			//
 			if (Objects.equals(encoding, BASE64)) {
 				//
-				bs = testAndApply(Objects::nonNull, get(map, INPUT), x -> decode(Base64.getDecoder(), x), null);
+				bs = testAndApply(Objects::nonNull, input, x -> decode(Base64.getDecoder(), x), null);
+				//
+			} else if (Objects.equals(encoding, "hex")) {
+				//
+				bs = testAndApply(Objects::nonNull, input, x -> Hex.decodeHex(x), null);
 				//
 			} else {
 				//
@@ -141,8 +154,10 @@ public class Win32DpApiUtil {
 				//
 			} // if
 				//
-			info(LOG, testAndApply(Objects::nonNull,
-					testAndApply(Objects::nonNull, bs, Crypt32Util::cryptUnprotectData, null), String::new, null));
+			info(LOG,
+					testAndApply(Objects::nonNull,
+							testAndApply(x -> x != null && isWindows(), bs, Crypt32Util::cryptUnprotectData, null),
+							String::new, null));
 			//
 		} else if (containsKey(map, "file")) {
 			//

@@ -14,6 +14,7 @@ import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -485,6 +486,12 @@ class Win32DpApiUtilTest {
 		//
 		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, Collections.singletonMap("file", "pom.xml")));
 		//
+		final Map<String, String> map = new LinkedHashMap<>(Collections.singletonMap("input", ""));
+		//
+		map.put("encoding", "hex");
+		//
+		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, map));
+		//
 	}
 
 	@Test
@@ -493,6 +500,12 @@ class Win32DpApiUtilTest {
 		Assert.assertNull(invoke(METHOD_CRYPT_UNPROTECT_DATA, null, Collections.singletonMap("file", null)));
 		//
 		Assert.assertNull(invoke(METHOD_CRYPT_UNPROTECT_DATA, null, Collections.singletonMap("file", "")));
+		//
+		final Map<String, String> map = new LinkedHashMap<>(Collections.singletonMap("input", ""));
+		//
+		map.put("encoding", "hex");
+		//
+		Assert.assertNull(invoke(METHOD_CRYPT_UNPROTECT_DATA, null, map));
 		//
 	}
 
