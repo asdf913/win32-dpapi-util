@@ -62,9 +62,9 @@ public class Win32DpApiUtil {
 		//
 		final boolean containsKeyFile = containsKey(map, "file");
 		//
+		final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
+		//
 		if (Objects.equals(action, "cryptProtectData")) {
-			//
-			final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
 			//
 			byte[] bs = null;
 			//
@@ -103,8 +103,6 @@ public class Win32DpApiUtil {
 			} // if
 				//
 		} else if (Objects.equals(action, "cryptUnprotectData")) {
-			//
-			final String encoding = get(map, "encoding");
 			//
 			byte[] bs = null;
 			//
