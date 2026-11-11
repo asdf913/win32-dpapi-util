@@ -182,7 +182,7 @@ public class Win32DpApiUtil {
 		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
 				collect(filter(
 						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
-						x -> Objects.equals(getName(x), "value")), Collectors.toList()),
+						x -> Objects.equals(getName(x), VALUE)), Collectors.toList()),
 				x -> IterableUtils.get(x, 0), null);
 		//
 		return (field == null || Boolean.logicalAnd(Narcissus.getField(instance, field) != null,
