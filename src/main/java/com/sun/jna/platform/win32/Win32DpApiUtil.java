@@ -6,6 +6,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Proxy;
 import java.nio.file.FileSystems;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
@@ -132,11 +133,11 @@ public class Win32DpApiUtil {
 
 	private static void cryptUnprotectData(final Map<String, String> map) throws IOException, DecoderException {
 		//
-		byte[] bs = null;
-		//
 		final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
 		//
 		if (containsKey(map, INPUT)) {
+			//
+			byte[] bs = null;
 			//
 			final String input = get(map, INPUT);
 			//
@@ -185,15 +186,17 @@ public class Win32DpApiUtil {
 				//
 			} // if
 				//
-			testAndAccept((a, b) -> b != null, fileOutput,
-					testAndApply(Objects::nonNull,
-							testAndApply(a -> a != null && a.exists() && a.isFile(),
-									testAndApply(Objects::nonNull, file, File::new, null),
-									FileUtils::readFileToByteArray, null),
-							Crypt32Util::cryptUnprotectData, null)
-
-					, FileUtils::writeByteArrayToFile);
+			final byte[] bs = testAndApply(Objects::nonNull, testAndApply(a -> a != null && a.exists() && a.isFile(),
+					testAndApply(Objects::nonNull, file, File::new, null), FileUtils::readFileToByteArray, null),
+					Crypt32Util::cryptUnprotectData, null);
 			//
+			if (!Arrays.equals(testAndApply(x -> x != null && x.exists() && x.isFile(), fileOutput,
+					FileUtils::readFileToByteArray, null), bs)) {
+				//
+				FileUtils.writeByteArrayToFile(fileOutput, bs);
+				//
+			} // if
+				//
 			info(LOG, "output={}", getAbsolutePath(fileOutput));
 			//
 		} else {
