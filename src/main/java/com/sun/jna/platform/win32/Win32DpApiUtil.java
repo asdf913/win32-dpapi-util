@@ -57,6 +57,8 @@ public class Win32DpApiUtil {
 
 	private static final String INPUT = "input";
 
+	private static final String CRYPT_PROTECT_DATA = "cryptProtectData";
+
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	private @interface URL {
@@ -87,7 +89,7 @@ public class Win32DpApiUtil {
 					public MethodVisitor visitMethod(final int access, final String name, final String descriptor,
 							final String signature, final String[] exceptions) {
 						//
-						if (Boolean.logicalAnd(Objects.equals(name, "cryptProtectData"),
+						if (Boolean.logicalAnd(Objects.equals(name, CRYPT_PROTECT_DATA),
 								Objects.equals(descriptor, "([B)[B"))) {
 							//
 							return mvi;
@@ -254,7 +256,7 @@ public class Win32DpApiUtil {
 		//
 		final String action = get(map, "action");
 		//
-		if (Objects.equals(action, "cryptProtectData")) {
+		if (Objects.equals(action, CRYPT_PROTECT_DATA)) {
 			//
 			cryptProtectData(map);
 			//
@@ -309,7 +311,7 @@ public class Win32DpApiUtil {
 			//
 			info(LOG, "input ={}", getAbsolutePath(f));
 			//
-			final File fileOutput = new File(getParentFile(f), String.join(".", getName(f), "cryptProtectData"));
+			final File fileOutput = new File(getParentFile(f), String.join(".", getName(f), CRYPT_PROTECT_DATA));
 			//
 			testAndAccept((a, b) -> b != null, fileOutput,
 					cryptProtectData(
