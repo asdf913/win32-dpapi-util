@@ -198,8 +198,6 @@ class Win32DpApiUtilTest {
 		//
 		Class<?>[] parameterTypes = null;
 		//
-		Class<?> parameterType = null;
-		//
 		Collection<Object> collection = null;
 		//
 		for (int i = 0; ms != null && i < ms.length; i++) {
@@ -215,7 +213,7 @@ class Win32DpApiUtilTest {
 			//
 			for (int j = 0; j < parameterTypes.length; j++) {
 				//
-				if (Objects.equals(parameterType = ArrayUtils.get(parameterTypes, j), Character.TYPE)) {
+				if (Objects.equals(ArrayUtils.get(parameterTypes, j), Character.TYPE)) {
 					//
 					add(collection, Character.valueOf(' '));
 					//
