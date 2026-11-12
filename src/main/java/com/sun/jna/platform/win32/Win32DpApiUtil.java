@@ -221,7 +221,7 @@ public class Win32DpApiUtil {
 				//
 			throw new RuntimeException();
 			//
-		};
+		}
 
 	}
 
