@@ -3,6 +3,10 @@ package com.sun.jna.platform.win32;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.ElementType;
+import java.lang.annotation.Retention;
+import java.lang.annotation.RetentionPolicy;
+import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Proxy;
@@ -53,7 +57,16 @@ public class Win32DpApiUtil {
 
 	private static final String INPUT = "input";
 
-	private static int DEFAULT_CRYPT_PROTECT_DATA_FLAGS, DEFAULT_CRYPT_UNPROTECT_DATA_FLAGS;
+	@Target(ElementType.FIELD)
+	@Retention(RetentionPolicy.RUNTIME)
+	private @interface URL {
+		String value();
+	}
+
+	@URL("https://learn.microsoft.com/en-us/windows/win32/api/dpapi/nf-dpapi-cryptprotectdata")
+	private static int DEFAULT_CRYPT_PROTECT_DATA_FLAGS;
+
+	private static int DEFAULT_CRYPT_UNPROTECT_DATA_FLAGS;
 
 	static {
 		//
