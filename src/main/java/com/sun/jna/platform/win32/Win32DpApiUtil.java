@@ -149,23 +149,13 @@ public class Win32DpApiUtil {
 		//
 		final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
 		//
+		final Integer flags = testAndApply(x -> containsKey(map, x), "flags",
+				x -> testAndApply(NumberUtils::isDigits, get(map, x), Integer::valueOf, null), null);
+		//
 		if (containsKey(map, INPUT)) {
 			//
-			byte[] bs = toByteArray(get(map, INPUT), encoding);
-			//
-			if (containsKey(map, "flags")) {
-				//
-				bs = testAndApply(x -> Boolean.logicalAnd(x != null, isWindows()), bs,
-						x -> Crypt32Util.cryptUnprotectData(x, NumberUtils.toInt(get(map, "flags"))), null);
-				//
-			} else {
-				//
-				bs = testAndApply(x -> Boolean.logicalAnd(x != null, isWindows()), bs, Crypt32Util::cryptUnprotectData,
-						null);
-				//
-			} // if
-				//
-			info(LOG, testAndApply(Objects::nonNull, bs, String::new, null));
+			info(LOG, testAndApply(Objects::nonNull, cryptUnprotectData(toByteArray(get(map, INPUT), encoding), flags),
+					String::new, null));
 			//
 		} else if (containsKey(map, "file")) {
 			//
@@ -193,21 +183,12 @@ public class Win32DpApiUtil {
 				//
 			} // if
 				//
-			byte[] bs = testAndApply(a -> and(a, Win32DpApiUtil::exists, Win32DpApiUtil::isFile),
-					testAndApply(Objects::nonNull, file, File::new, null), FileUtils::readFileToByteArray, null);
+			final byte[] bs = cryptUnprotectData(
+					testAndApply(a -> and(a, Win32DpApiUtil::exists, Win32DpApiUtil::isFile),
+							testAndApply(Objects::nonNull, file, File::new, null), FileUtils::readFileToByteArray,
+							null),
+					flags);
 			//
-			if (containsKey(map, "flags")) {
-				//
-				bs = testAndApply(x -> Boolean.logicalAnd(x != null, isWindows()), bs,
-						x -> Crypt32Util.cryptUnprotectData(x, NumberUtils.toInt(get(map, "flags"))), null);
-				//
-			} else {
-				//
-				bs = testAndApply(x -> Boolean.logicalAnd(x != null, isWindows()), bs, Crypt32Util::cryptUnprotectData,
-						null);
-				//
-			} // if
-				//
 			if (!Arrays.equals(testAndApply(x -> and(x, Win32DpApiUtil::exists, Win32DpApiUtil::isFile), fileOutput,
 					FileUtils::readFileToByteArray, null), bs)) {
 				//
@@ -223,6 +204,19 @@ public class Win32DpApiUtil {
 			//
 		} // if
 			//
+	}
+
+	private static byte[] cryptUnprotectData(final byte[] data, final Integer flags) {
+		//
+		if (data == null || !isWindows()) {
+			//
+			return null;
+			//
+		} // if
+			//
+		return flags != null ? Crypt32Util.cryptUnprotectData(data, flags.intValue())
+				: Crypt32Util.cryptUnprotectData(data);
+		//
 	}
 
 	private static byte[] toByteArray(final String instance, final String encoding) throws DecoderException {
