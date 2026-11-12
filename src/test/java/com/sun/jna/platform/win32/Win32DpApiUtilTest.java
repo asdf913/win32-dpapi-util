@@ -44,7 +44,7 @@ class Win32DpApiUtilTest {
 	private static Method METHOD_GET_NAME_MEMBER, METHOD_GET_NAME_FILE, METHOD_GET_CLASS, METHOD_DECODE,
 			METHOD_ENCODE_TO_STRING, METHOD_GET_BYTES, METHOD_TO_MAP, METHOD_COLLECT, METHOD_GET_ABSOLUTE_PATH,
 			METHOD_ENDS_WITH, METHOD_CONTAINS_KEY, METHOD_GET_PARENT_FILE, METHOD_CRYPT_PROTECT_DATA,
-			METHOD_CRYPT_UNPROTECT_DATA, METHOD_TEST_AND_ACCEPT = null;
+			METHOD_CRYPT_UNPROTECT_DATA, METHOD_TEST_AND_ACCEPT, METHOD_PUT = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -82,6 +82,8 @@ class Win32DpApiUtilTest {
 		//
 		(METHOD_TEST_AND_ACCEPT = clz.getDeclaredMethod("testAndAccept", BiPredicate.class, Object.class, Object.class,
 				FailableBiConsumer.class)).setAccessible(true);
+		//
+		(METHOD_PUT = clz.getDeclaredMethod("put", Map.class, Object.class, Object.class)).setAccessible(true);
 		//
 	}
 
@@ -482,7 +484,7 @@ class Win32DpApiUtilTest {
 	}
 
 	@Test
-	void testCryptProtectData() throws IllegalAccessException, InvocationTargetException {
+	void testCryptProtectData() throws Throwable {
 		//
 		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, Collections.singletonMap("file", null)));
 		//
@@ -492,18 +494,26 @@ class Win32DpApiUtilTest {
 		//
 		final Map<String, String> map = new LinkedHashMap<>(Collections.singletonMap("input", ""));
 		//
-		map.put("encoding", "hex");
+		put(map, "encoding", "hex");
 		//
 		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, map));
 		//
-		map.put("flags", "0");
+		put(map, "flags", "0");
 		//
 		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, map));
 		//
 	}
 
+	private static <K, V> void put(final Map<K, V> instance, final K key, final V value) throws Throwable {
+		try {
+			invoke(METHOD_PUT, null, instance, key, value);
+		} catch (final InvocationTargetException e) {
+			throw e.getTargetException();
+		}
+	}
+
 	@Test
-	void testCryptUnprotectData() throws IllegalAccessException, InvocationTargetException {
+	void testCryptUnprotectData() throws Throwable {
 		//
 		Assert.assertNull(invoke(METHOD_CRYPT_UNPROTECT_DATA, null, Collections.singletonMap("file", null)));
 		//
@@ -511,7 +521,7 @@ class Win32DpApiUtilTest {
 		//
 		final Map<String, String> map = new LinkedHashMap<>(Collections.singletonMap("input", ""));
 		//
-		map.put("encoding", "hex");
+		put(map, "encoding", "hex");
 		//
 		Assert.assertNull(invoke(METHOD_CRYPT_UNPROTECT_DATA, null, map));
 		//
