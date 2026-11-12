@@ -496,6 +496,10 @@ class Win32DpApiUtilTest {
 		//
 		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, map));
 		//
+		map.put("flags", "0");
+		//
+		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, map));
+		//
 	}
 
 	@Test

@@ -86,9 +86,8 @@ public class Win32DpApiUtil {
 		//
 		final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
 		//
-		final Integer flags = containsKey(map, "flags")
-				? testAndApply(NumberUtils::isDigits, get(map, "flags"), Integer::valueOf, null)
-				: null;
+		final Integer flags = testAndApply(x -> containsKey(map, x), "flags",
+				x -> testAndApply(NumberUtils::isDigits, get(map, x), Integer::valueOf, null), null);
 		//
 		if (containsKey(map, INPUT)) {
 			//
