@@ -89,9 +89,13 @@ public class Win32DpApiUtil {
 		final Integer flags = testAndApply(x -> containsKey(map, x), "flags",
 				x -> testAndApply(NumberUtils::isDigits, get(map, x), Integer::valueOf, null), null);
 		//
+		final byte[] entropy = getBytes(get(map, "entropy"));
+		//
+		final String description = get(map, "description");
+		//
 		if (containsKey(map, INPUT)) {
 			//
-			final byte[] bs = cryptProtectData(getBytes(get(map, INPUT)), flags);
+			final byte[] bs = cryptProtectData(getBytes(get(map, INPUT)), entropy, flags, description);
 			//
 			if (Objects.equals(encoding, BASE64)) {
 				//
@@ -119,7 +123,7 @@ public class Win32DpApiUtil {
 					cryptProtectData(
 							testAndApply(a -> and(a, Win32DpApiUtil::exists, Win32DpApiUtil::isFile) && isWindows(), f,
 									FileUtils::readFileToByteArray, null),
-							flags),
+							entropy, flags, description),
 					FileUtils::writeByteArrayToFile);
 			//
 			info(LOG, "output={}", getAbsolutePath(fileOutput));
@@ -132,11 +136,19 @@ public class Win32DpApiUtil {
 			//
 	}
 
-	private static byte[] cryptProtectData(final byte[] data, final Integer flags) {
+	private static byte[] cryptProtectData(final byte[] data, final byte[] entropy, final Integer flags,
+			final String description) {
 		//
 		if (data == null || !isWindows()) {
 			//
 			return null;
+			//
+		} // if
+			//
+		if (entropy != null || StringUtils.isNotEmpty(description)) {
+			//
+			return flags != null ? Crypt32Util.cryptProtectData(data, entropy, flags.intValue(), description, null)
+					: Crypt32Util.cryptProtectData(data, entropy, 0, description, null);
 			//
 		} // if
 			//
@@ -152,10 +164,12 @@ public class Win32DpApiUtil {
 		final Integer flags = testAndApply(x -> containsKey(map, x), "flags",
 				x -> testAndApply(NumberUtils::isDigits, get(map, x), Integer::valueOf, null), null);
 		//
+		final byte[] entropy = getBytes(get(map, "entropy"));
+		//
 		if (containsKey(map, INPUT)) {
 			//
-			info(LOG, testAndApply(Objects::nonNull, cryptUnprotectData(toByteArray(get(map, INPUT), encoding), flags),
-					String::new, null));
+			info(LOG, testAndApply(Objects::nonNull,
+					cryptUnprotectData(toByteArray(get(map, INPUT), encoding), entropy, flags), String::new, null));
 			//
 		} else if (containsKey(map, "file")) {
 			//
@@ -187,7 +201,7 @@ public class Win32DpApiUtil {
 					testAndApply(a -> and(a, Win32DpApiUtil::exists, Win32DpApiUtil::isFile),
 							testAndApply(Objects::nonNull, file, File::new, null), FileUtils::readFileToByteArray,
 							null),
-					flags);
+					entropy, flags);
 			//
 			if (!Arrays.equals(testAndApply(x -> and(x, Win32DpApiUtil::exists, Win32DpApiUtil::isFile), fileOutput,
 					FileUtils::readFileToByteArray, null), bs)) {
@@ -206,11 +220,18 @@ public class Win32DpApiUtil {
 			//
 	}
 
-	private static byte[] cryptUnprotectData(final byte[] data, final Integer flags) {
+	private static byte[] cryptUnprotectData(final byte[] data, final byte[] entropy, final Integer flags) {
 		//
 		if (data == null || !isWindows()) {
 			//
 			return null;
+			//
+		} // if
+			//
+		if (entropy != null) {
+			//
+			return flags != null ? Crypt32Util.cryptUnprotectData(data, entropy, flags.intValue(), null)
+					: Crypt32Util.cryptUnprotectData(data, entropy, 0, null);
 			//
 		} // if
 			//
