@@ -2,6 +2,7 @@ package com.sun.jna.platform.win32;
 
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Proxy;
@@ -33,6 +34,10 @@ import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.apache.commons.lang3.tuple.Pair;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassVisitor;
+import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
@@ -47,6 +52,180 @@ public class Win32DpApiUtil {
 	private static final String BASE64 = "base64";
 
 	private static final String INPUT = "input";
+
+	private static int DEFAULT_CRYPT_PROTECT_DATA_FLAGS, DEFAULT_CRYPT_UNPROTECT_DATA_FLAGS;
+
+	static {
+		//
+		final int api = Opcodes.ASM9;
+		//
+		try (final InputStream is = getResourceAsStream(Win32DpApiUtil.class,
+				StringUtils.join("/", replace(getName(Crypt32Util.class), '.', '/'), ".class"))) {
+			//
+			final ClassReader cr = testAndApply(Objects::nonNull, is, ClassReader::new, null);
+			//
+			if (cr != null) {
+				//
+				final MethodVisitorImpl mvi = new MethodVisitorImpl();
+				//
+				cr.accept(new ClassVisitor(api) {
+
+					@Override
+					public MethodVisitor visitMethod(final int access, final String name, final String descriptor,
+							final String signature, final String[] exceptions) {
+						//
+						if (Boolean.logicalAnd(Objects.equals(name, "cryptProtectData"),
+								Objects.equals(descriptor, "([B)[B"))) {
+							//
+							return mvi;
+							//
+						} // if
+							//
+						return super.visitMethod(access, name, descriptor, signature, exceptions);
+						//
+					}
+
+				}, 0);
+				//
+				if (mvi.integer != null) {
+					//
+					DEFAULT_CRYPT_PROTECT_DATA_FLAGS = mvi.integer.intValue();
+					//
+				} // if
+					//
+			} // try
+				//
+		} catch (final IOException e) {
+			//
+			error(LOG, getMessage(e), e);
+			//
+		} // try
+			//
+		try (final InputStream is = getResourceAsStream(Win32DpApiUtil.class,
+				StringUtils.join("/", replace(getName(Crypt32Util.class), '.', '/'), ".class"))) {
+			//
+			final ClassReader cr = testAndApply(Objects::nonNull, is, ClassReader::new, null);
+			//
+			if (cr != null) {
+				//
+				final MethodVisitorImpl mvi = new MethodVisitorImpl();
+				//
+				cr.accept(new ClassVisitor(api) {
+
+					@Override
+					public MethodVisitor visitMethod(final int access, final String name, final String descriptor,
+							final String signature, final String[] exceptions) {
+						//
+						if (Boolean.logicalAnd(Objects.equals(name, "cryptUnprotectData"),
+								Objects.equals(descriptor, "([B)[B"))) {
+							//
+							return mvi;
+							//
+						} // if
+							//
+						return super.visitMethod(access, name, descriptor, signature, exceptions);
+						//
+					}
+
+				}, 0);
+				//
+				if (mvi.integer != null) {
+					//
+					DEFAULT_CRYPT_UNPROTECT_DATA_FLAGS = mvi.integer.intValue();
+					//
+				} // if
+					//
+			} // try
+				//
+		} catch (final IOException e) {
+			//
+			error(LOG, getMessage(e), e);
+			//
+		} // try
+			//
+	}
+
+	private static void error(final Logger instance, final String msg, final Throwable t) {
+		if (instance != null) {
+			instance.error(msg, t);
+		}
+	}
+
+	private static String getMessage(final Throwable instance) {
+		return instance != null ? instance.getMessage() : null;
+	}
+
+	private static InputStream getResourceAsStream(final Class<?> clz, final String name) {
+		//
+		if (clz == null) {
+			//
+			return null;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(name), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), VALUE)), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		return field == null || Narcissus.getField(name, field) != null ? clz.getResourceAsStream(name) : null;
+		//
+	}
+
+	private static class MethodVisitorImpl extends MethodVisitor {
+
+		private Integer integer = null;
+
+		private MethodVisitorImpl() {
+			//
+			super(Opcodes.ASM9);
+			//
+		}
+
+		public void visitInsn(final int opcode) {
+			//
+			if (opcode == Opcodes.ICONST_0) {
+				//
+				if (integer != null) {
+					//
+					throw new RuntimeException();
+					//
+				} // if
+					//
+				integer = Integer.valueOf(0);
+				//
+				return;
+				//
+			} else if (opcode == Opcodes.ARETURN) {
+				//
+				return;
+				//
+			} // if
+				//
+			throw new RuntimeException();
+			//
+		};
+
+	}
+
+	private static String replace(final String instance, final char oldChar, final char newChar) {
+		//
+		if (instance == null) {
+			//
+			return null;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), VALUE)), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		return field == null || Narcissus.getField(instance, field) != null ? instance.replace(oldChar, newChar) : null;
+		//
+	}
 
 	public static void main(final String[] args) throws IOException, DecoderException {
 		//
@@ -148,7 +327,7 @@ public class Win32DpApiUtil {
 		if (entropy != null || StringUtils.isNotEmpty(description)) {
 			//
 			return flags != null ? Crypt32Util.cryptProtectData(data, entropy, flags.intValue(), description, null)
-					: Crypt32Util.cryptProtectData(data, entropy, 0, description, null);
+					: Crypt32Util.cryptProtectData(data, entropy, DEFAULT_CRYPT_PROTECT_DATA_FLAGS, description, null);
 			//
 		} // if
 			//
@@ -231,7 +410,7 @@ public class Win32DpApiUtil {
 		if (entropy != null) {
 			//
 			return flags != null ? Crypt32Util.cryptUnprotectData(data, entropy, flags.intValue(), null)
-					: Crypt32Util.cryptUnprotectData(data, entropy, 0, null);
+					: Crypt32Util.cryptUnprotectData(data, entropy, DEFAULT_CRYPT_UNPROTECT_DATA_FLAGS, null);
 			//
 		} // if
 			//

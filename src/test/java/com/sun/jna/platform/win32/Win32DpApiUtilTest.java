@@ -198,15 +198,36 @@ class Win32DpApiUtilTest {
 		//
 		Class<?>[] parameterTypes = null;
 		//
+		Class<?> parameterType = null;
+		//
+		Collection<Object> collection = null;
+		//
 		for (int i = 0; ms != null && i < ms.length; i++) {
 			//
-			if ((m = ArrayUtils.get(ms, i)) == null || m.isSynthetic()) {
+			if ((m = ArrayUtils.get(ms, i)) == null || m.isSynthetic()
+					|| (parameterTypes = m.getParameterTypes()) == null) {
 				//
 				continue;
 				//
 			} // if
 				//
-			os = toArray(Collections.nCopies(m.getParameterCount(), null));
+			clear(collection = ObjectUtils.getIfNull(collection, ArrayList::new));
+			//
+			for (int j = 0; j < parameterTypes.length; j++) {
+				//
+				if (Objects.equals(parameterType = ArrayUtils.get(parameterTypes, j), Character.TYPE)) {
+					//
+					add(collection, Character.valueOf(' '));
+					//
+				} else {
+					//
+					add(collection, null);
+					//
+				} // if
+					//
+			} // for
+				//
+			os = toArray(collection);
 			//
 			toString = Objects.toString(m);
 			//
@@ -288,6 +309,10 @@ class Win32DpApiUtilTest {
 				if (Objects.equals(parameterType = ArrayUtils.get(parameterTypes, j), Class.class)) {
 					//
 					add(collection, Class.class);
+					//
+				} else if (Objects.equals(parameterType, Character.TYPE)) {
+					//
+					add(collection, Character.valueOf(' '));
 					//
 				} else if (parameterType != null && parameterType.isInterface()) {
 					//
