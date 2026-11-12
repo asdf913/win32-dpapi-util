@@ -198,6 +198,7 @@ public class Win32DpApiUtil {
 			//
 		}
 
+		@Override
 		public void visitInsn(final int opcode) {
 			//
 			if (opcode == Opcodes.ICONST_0) {
