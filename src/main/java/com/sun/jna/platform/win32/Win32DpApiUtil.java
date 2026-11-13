@@ -2,6 +2,8 @@ package com.sun.jna.platform.win32;
 
 import java.awt.Component;
 import java.awt.GraphicsEnvironment;
+import java.awt.event.ActionEvent;
+import java.awt.event.ActionListener;
 import java.awt.geom.Dimension2D;
 import java.io.File;
 import java.io.IOException;
@@ -39,8 +41,10 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.swing.AbstractButton;
 import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -79,7 +83,7 @@ import com.google.common.reflect.ClassPath.ClassInfo;
 import io.github.toolfactory.narcissus.Narcissus;
 import net.miginfocom.swing.MigLayout;
 
-public class Win32DpApiUtil extends JPanel {
+public class Win32DpApiUtil extends JPanel implements ActionListener {
 
 	private static final long serialVersionUID = 823115347964369539L;
 
@@ -134,6 +138,8 @@ public class Win32DpApiUtil extends JPanel {
 	private transient ComboBoxModel<?> cbmCryptProtect = null;
 
 	private transient ComboBoxModel<?> cbmCryptUnprotect = null;
+
+	private AbstractButton btnCryptProtect, btnCryptUnprotect = null;
 
 	static {
 		//
@@ -367,6 +373,12 @@ public class Win32DpApiUtil extends JPanel {
 				jPanel1.add(instance.jtcCryptProtectDescription = new JTextField(),
 						String.format("%1$s,%2$s", growx, wrap));
 				//
+				jPanel1.add(new JLabel());
+				//
+				jPanel1.add(instance.btnCryptProtect = new JButton("Execute"), String.format("%1$s,%2$s", growx, wrap));
+				//
+				instance.btnCryptProtect.addActionListener(instance);
+				//
 				jtp.add("CryptProtect", jPanel1);
 				//
 				final JPanel jPanel2 = new JPanel();
@@ -392,6 +404,13 @@ public class Win32DpApiUtil extends JPanel {
 				//
 				jPanel2.add(instance.jtcCryptUnprotectEntropy = new JTextField(),
 						String.format("%1$s,%2$s", growx, wrap));
+				//
+				jPanel2.add(new JLabel());
+				//
+				jPanel2.add(instance.btnCryptUnprotect = new JButton("Execute"),
+						String.format("%1$s,%2$s", growx, wrap));
+				//
+				instance.btnCryptUnprotect.addActionListener(instance);
 				//
 				jtp.add("CryptUnprotect", jPanel2);
 				//
@@ -1199,6 +1218,104 @@ public class Win32DpApiUtil extends JPanel {
 
 	private static Class<?> getClass(final Object instance) {
 		return instance != null ? instance.getClass() : null;
+	}
+
+	@Override
+	public void actionPerformed(final ActionEvent evt) {
+		//
+		final Object source = evt != null ? evt.getSource() : null;
+		//
+		if (Objects.equals(source, btnCryptProtect)) {
+			//
+			final byte[] bs = cryptProtectData(getBytes(getText(jtcCryptProtectInput)),
+					getBytes(getText(jtcCryptProtectEntropy)),
+					testAndApply(NumberUtils::isDigits, getText(jtcCryptProtectFlags), Integer::valueOf, null),
+					getText(jtcCryptProtectDescription));
+			//
+			final Map<String, Class<?>> encodingMap = getEncodingMap(getContextClassLoader(Thread.currentThread()));
+			//
+			final String encoding = StringUtils.defaultIfEmpty(Objects.toString(getSelectedItem(cbmCryptProtect)),
+					BASE64);
+			//
+			if (!containsKey(encodingMap, encoding)) {
+				//
+				throw new RuntimeException(String.format(
+						"Please specify the encoding from the following encoding (%1$s). ", keySet(encodingMap)));
+				//
+			} // if
+				//
+			final Class<?> clz = get(encodingMap, encoding);
+			//
+			BinaryEncoder binaryEncoder = null;
+			//
+			try {
+				//
+				binaryEncoder = cast(BinaryEncoder.class, clz != null ? clz.newInstance() : null);
+				//
+				info(LOG, testAndApply(Objects::nonNull,
+						binaryEncoder != null && bs != null ? binaryEncoder.encode(bs) : null, String::new, null));
+				//
+			} catch (final InstantiationException | IllegalAccessException | EncoderException e) {
+				//
+				throw new RuntimeException(e);
+				//
+			} // try
+				//
+		} else if (Objects.equals(source, btnCryptUnprotect)) {
+			//
+			final Map<String, Class<?>> encodingMap = getEncodingMap(getContextClassLoader(Thread.currentThread()));
+			//
+			final String encoding = StringUtils.defaultIfEmpty(Objects.toString(getSelectedItem(cbmCryptUnprotect)),
+					BASE64);
+			//
+			if (!containsKey(encodingMap, encoding)) {
+				//
+				throw new RuntimeException(String.format(
+						"Please specify the encoding from the following encoding (%1$s). ", keySet(encodingMap)));
+				//
+			} // if
+				//
+			final Class<?> clz = get(encodingMap, encoding);
+			//
+			try {
+				//
+				info(LOG, testAndApply(Objects::nonNull, cryptUnprotectData(
+						toByteArray(getText(jtcCryptUnprotectInput),
+								cast(BinaryDecoder.class, clz != null ? clz.newInstance() : null)),
+						getBytes(getText(jtcCryptUnprotectEntropy)),
+						testAndApply(NumberUtils::isDigits, getText(jtcCryptUnprotectFlags), Integer::valueOf, null)),
+						String::new, null));
+				//
+			} catch (final InstantiationException | IllegalAccessException | DecoderException e) {
+				//
+				throw new RuntimeException(e);
+				//
+			} // try
+				//
+		} // if
+			//
+	}
+
+	private static Object getSelectedItem(final ComboBoxModel<?> instance) {
+		return instance != null ? instance.getSelectedItem() : null;
+	}
+
+	private static String getText(final JTextComponent instance) {
+		//
+		if (instance == null) {
+			//
+			return null;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), "model")), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		return field == null || Narcissus.getField(instance, field) != null ? instance.getText() : null;
+		//
 	}
 
 }

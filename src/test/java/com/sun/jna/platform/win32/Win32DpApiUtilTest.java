@@ -2,6 +2,7 @@ package com.sun.jna.platform.win32;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.event.ActionEvent;
 import java.awt.geom.Dimension2D;
 import java.io.File;
 import java.io.IOException;
@@ -34,7 +35,12 @@ import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
+import javax.swing.AbstractButton;
+import javax.swing.ComboBoxModel;
+import javax.swing.JButton;
 import javax.swing.JLabel;
+import javax.swing.JTextField;
+import javax.swing.text.JTextComponent;
 
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.EncoderException;
@@ -51,8 +57,8 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
-import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.common.reflect.ClassPath;
+import com.google.common.reflect.ClassPath.ClassInfo;
 import com.google.common.reflect.Reflection;
 
 import io.github.toolfactory.narcissus.Narcissus;
@@ -64,7 +70,8 @@ class Win32DpApiUtilTest {
 			METHOD_GET_PARENT_FILE, METHOD_CRYPT_PROTECT_DATA, METHOD_CRYPT_UNPROTECT_DATA, METHOD_TEST_AND_ACCEPT,
 			METHOD_PUT, METHOD_LOAD, METHOD_GET_CONTEXT_CLASS_LOADER, METHOD_TEST_AND_APPLY,
 			METHOD_GET_TOP_LEVEL_CLASSES, METHOD_MATCHER, METHOD_TO_LOWER_CASE, METHOD_MATCHES, METHOD_FIND,
-			METHOD_IS_ABSTRACT, METHOD_IS_ASSIGNABLE_FROM, METHOD_TEST_AND_GET, METHOD_TEST_AND_RUN = null;
+			METHOD_IS_ABSTRACT, METHOD_IS_ASSIGNABLE_FROM, METHOD_TEST_AND_GET, METHOD_TEST_AND_RUN, METHOD_CAST,
+			METHOD_IS_STATIC, METHOD_GET_TEXT = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -129,6 +136,12 @@ class Win32DpApiUtilTest {
 		(METHOD_TEST_AND_GET = clz.getDeclaredMethod("testAndGet", Boolean.TYPE, Supplier.class)).setAccessible(true);
 		//
 		(METHOD_TEST_AND_RUN = clz.getDeclaredMethod("testAndRun", Boolean.TYPE, Runnable.class)).setAccessible(true);
+		//
+		(METHOD_CAST = clz.getDeclaredMethod("cast", Class.class, Object.class)).setAccessible(true);
+		//
+		(METHOD_IS_STATIC = clz.getDeclaredMethod("isStatic", Member.class)).setAccessible(true);
+		//
+		(METHOD_GET_TEXT = clz.getDeclaredMethod("getText", JTextComponent.class)).setAccessible(true);
 		//
 	}
 
@@ -212,6 +225,10 @@ class Win32DpApiUtilTest {
 				//
 				return null;
 				//
+			} else if (proxy instanceof ComboBoxModel && Objects.equals(name, "getSelectedItem")) {
+				//
+				return null;
+				//
 			} // if
 				//
 			throw new Throwable(name);
@@ -220,13 +237,25 @@ class Win32DpApiUtilTest {
 
 	}
 
+	private Win32DpApiUtil instance = null;
+
 	private IH ih = null;
 
 	@BeforeMethod
-	void beforeMethod() {
+	void beforeMethod() throws Throwable {
+		//
+		instance = cast(Win32DpApiUtil.class, Narcissus.allocateInstance(Win32DpApiUtil.class));
 		//
 		ih = new IH();
 		//
+	}
+
+	private static <T> T cast(final Class<T> clz, final Object instance) throws Throwable {
+		try {
+			return (T) invoke(METHOD_CAST, null, clz, instance);
+		} catch (final InvocationTargetException e) {
+			throw e.getTargetException();
+		}
 	}
 
 	private static String getName(final Member instance) throws Throwable {
@@ -303,17 +332,31 @@ class Win32DpApiUtilTest {
 			if (Boolean.logicalAnd(contains(Arrays.asList("cryptProtectData", "cryptUnprotectData"), name = getName(m)),
 					Arrays.equals(parameterTypes = m.getParameterTypes(), new Class<?>[] { Map.class, Map.class }))
 					|| Boolean.logicalAnd(Objects.equals(name, "toByteArray"),
-							Arrays.equals(parameterTypes, new Class<?>[] { String.class, String.class }))) {
+							Arrays.equals(parameterTypes, new Class<?>[] { String.class, String.class }))
+					|| Boolean.logicalAnd(Objects.equals(name, "actionPerformed"),
+							Arrays.equals(parameterTypes, new Class<?>[] { ActionEvent.class }))) {
 				//
 				final Method m1 = m;
 				//
 				final Object[] os1 = os;
 				//
-				Assert.assertThrows(Throwable.class, () -> Narcissus.invokeStaticMethod(m1, os1));
+				Assert.assertThrows(Throwable.class, () -> {
+					//
+					if (isStatic(m1)) {
+						//
+						Narcissus.invokeStaticMethod(m1, os1);
+						//
+					} else {
+						//
+						Narcissus.invokeMethod(instance, m1, os1);
+						//
+					} // if
+						//
+				});
 				//
 			} else {
 				//
-				result = Narcissus.invokeStaticMethod(m, os);
+				result = isStatic(m) ? Narcissus.invokeStaticMethod(m, os) : Narcissus.invokeMethod(instance, m, os);
 				//
 				if (contains(Arrays.asList(Integer.TYPE, Boolean.TYPE), getReturnType(m))) {
 					//
@@ -329,6 +372,18 @@ class Win32DpApiUtilTest {
 				//
 		} // for
 			//
+	}
+
+	private static boolean isStatic(final Member instance) throws Throwable {
+		try {
+			final Object obj = invoke(METHOD_IS_STATIC, null, instance);
+			if (obj instanceof Boolean) {
+				return ((Boolean) obj).booleanValue();
+			}
+			throw new Throwable(Objects.toString(getClass(obj)));
+		} catch (final InvocationTargetException e) {
+			throw e.getTargetException();
+		}
 	}
 
 	private static Class<?> getReturnType(final Method instance) {
@@ -399,6 +454,10 @@ class Win32DpApiUtilTest {
 					//
 					add(collection, Narcissus.allocateInstance(JLabel.class));
 					//
+				} else if (Objects.equals(parameterType, JTextComponent.class)) {
+					//
+					add(collection, Narcissus.allocateInstance(JTextField.class));
+					//
 				} else if (Objects.equals(parameterType, Dimension2D.class)) {
 					//
 					add(collection, Narcissus.allocateInstance(Dimension.class));
@@ -453,28 +512,41 @@ class Win32DpApiUtilTest {
 			//
 			toString = Objects.toString(m);
 			//
-			result = Narcissus.invokeStaticMethod(m, os);
-			//
-			if (contains(Arrays.asList(Integer.TYPE, Boolean.TYPE), getReturnType(m))
-					|| Boolean.logicalAnd(Objects.equals(name = getName(m), "getName"),
-							Arrays.equals(parameterTypes, new Class<?>[] { Class.class }))
-					|| Boolean.logicalAnd(Objects.equals(name, "getClass"),
-							Arrays.equals(parameterTypes, new Class<?>[] { Object.class }))
-					|| Boolean.logicalAnd(Objects.equals(name, "filter"),
-							Arrays.equals(parameterTypes, new Class<?>[] { Stream.class, Predicate.class }))
-					|| Boolean.logicalAnd(Objects.equals(name, "encodeToString"),
-							Arrays.equals(parameterTypes, new Class<?>[] { Encoder.class, byte[].class }))
-					|| Boolean.logicalAnd(Objects.equals(name, "getSimpleName"),
-							Arrays.equals(parameterTypes, new Class<?>[] { Class.class }))
-					|| Boolean.logicalAnd(Objects.equals(name, "getWidth"),
-							Arrays.equals(parameterTypes, new Class<?>[] { Dimension2D.class }))) {
+			if (Boolean.logicalAnd(Objects.equals(name = getName(m), "actionPerformed"),
+					Arrays.equals(parameterTypes, new Class<?>[] { ActionEvent.class }))) {
 				//
-				Assert.assertNotNull(result, toString);
+				final Method m1 = m;
+				//
+				final Object[] os1 = os;
+				//
+				Assert.assertThrows(Throwable.class, () -> Narcissus.invokeMethod(instance, m1, os1));
 				//
 			} else {
 				//
-				Assert.assertNull(result, toString);
+				result = Narcissus.invokeStaticMethod(m, os);
 				//
+				if (contains(Arrays.asList(Integer.TYPE, Boolean.TYPE), getReturnType(m))
+						|| Boolean.logicalAnd(Objects.equals(name, "getName"),
+								Arrays.equals(parameterTypes, new Class<?>[] { Class.class }))
+						|| Boolean.logicalAnd(Objects.equals(name, "getClass"),
+								Arrays.equals(parameterTypes, new Class<?>[] { Object.class }))
+						|| Boolean.logicalAnd(Objects.equals(name, "filter"),
+								Arrays.equals(parameterTypes, new Class<?>[] { Stream.class, Predicate.class }))
+						|| Boolean.logicalAnd(Objects.equals(name, "encodeToString"),
+								Arrays.equals(parameterTypes, new Class<?>[] { Encoder.class, byte[].class }))
+						|| Boolean.logicalAnd(Objects.equals(name, "getSimpleName"),
+								Arrays.equals(parameterTypes, new Class<?>[] { Class.class }))
+						|| Boolean.logicalAnd(Objects.equals(name, "getWidth"),
+								Arrays.equals(parameterTypes, new Class<?>[] { Dimension2D.class }))) {
+					//
+					Assert.assertNotNull(result, toString);
+					//
+				} else {
+					//
+					Assert.assertNull(result, toString);
+					//
+				} // if
+					//
 			} // if
 				//
 		} // for
@@ -769,6 +841,31 @@ class Win32DpApiUtilTest {
 		//
 		Assert.assertNull(invoke(METHOD_TEST_AND_RUN, null, Boolean.TRUE,
 				Reflection.newProxy(Runnable.class, ObjectUtils.getIfNull(ih, IH::new))));
+		//
+	}
+
+	@Test
+	void testGetText() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertEquals(invoke(METHOD_GET_TEXT, null, new JTextField()), "");
+		//
+	}
+
+	@Test
+	void testActionPerformed() throws IllegalAccessException {
+		//
+		if (instance == null) {
+			//
+			return;
+			//
+		} // if
+			//
+		final AbstractButton btnCryptUnprotect = new JButton();
+		//
+		FieldUtils.writeDeclaredField(instance, "btnCryptUnprotect", btnCryptUnprotect, true);
+		//
+		Assert.assertThrows(Throwable.class,
+				() -> instance.actionPerformed(new ActionEvent(btnCryptUnprotect, 0, null)));
 		//
 	}
 
