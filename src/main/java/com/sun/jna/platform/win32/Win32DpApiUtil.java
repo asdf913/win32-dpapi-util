@@ -313,7 +313,7 @@ public class Win32DpApiUtil {
 			//
 	}
 
-	private static ClassPath from(final ClassLoader classloader) throws IOException {
+	private static ClassPath from(final ClassLoader classloader) {
 		//
 		final List<Method> ms = collect(
 				filter(testAndApply(Objects::nonNull, ClassPath.class.getDeclaredMethods(), Arrays::stream, null),
