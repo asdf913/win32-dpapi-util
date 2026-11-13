@@ -163,7 +163,7 @@ class Win32DpApiUtilTest {
 					//
 			} else if (proxy instanceof Map) {
 				//
-				if (contains(Arrays.asList("get", "put"), name)) {
+				if (contains(Arrays.asList("get", "put", "keySet"), name)) {
 					//
 					return null;
 					//
@@ -200,7 +200,7 @@ class Win32DpApiUtilTest {
 					//
 				} // if
 					//
-			} else if (proxy instanceof Collection && Objects.equals(name, "stream")) {
+			} else if (proxy instanceof Collection && contains(Arrays.asList("stream", "toArray"), name)) {
 				//
 				return null;
 				//

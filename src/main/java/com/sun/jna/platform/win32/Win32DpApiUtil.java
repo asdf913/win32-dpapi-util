@@ -26,6 +26,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
@@ -38,6 +39,10 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.swing.AbstractButton;
+import javax.swing.ComboBoxModel;
+import javax.swing.DefaultComboBoxModel;
+import javax.swing.JComboBox;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -125,6 +130,8 @@ public class Win32DpApiUtil extends JPanel {
 	private JTextComponent jtcCryptUnprotectEntropy = null;
 
 	private JTextComponent jtcCryptProtectDescription = null;
+
+	private ComboBoxModel<?> cbmCryptProtect, cbmCryptUnprotect = null;
 
 	static {
 		//
@@ -314,7 +321,8 @@ public class Win32DpApiUtil extends JPanel {
 			//
 			instance.setLayout(new MigLayout());
 			//
-			if (isWindows) {
+			if (isWindows || true// TODO
+			) {
 				//
 				final JTabbedPane jtp = new JTabbedPane();
 				//
@@ -322,16 +330,60 @@ public class Win32DpApiUtil extends JPanel {
 				//
 				jPanel1.setLayout(new MigLayout());
 				//
-				jPanel1.add(new JLabel("Input"));
+				jPanel1.add(new JLabel("Encoding"));
+				//
+				final Map<String, Class<?>> encodingMap = getEncodingMap(getContextClassLoader(Thread.currentThread()));
 				//
 				final String wrap = "wrap";
 				//
-				jPanel1.add(instance.jtcCryptProtectInput = new JTextField(),
+				final String[] encodings = toArray(keySet(encodingMap), new String[] {});
+				//
+				Arrays.sort(encodings, (a, b) -> {
+					//
+					final int compare = Integer.compare(StringUtils.length(a), StringUtils.length(b));
+					//
+					if (compare < 0) {
+						//
+						return compare;
+						//
+					} // if
+						//
+					final Pattern pattern = Pattern.compile("\\d+");
+					//
+					Matcher matcher = matcher(pattern, a);
+					//
+					String s = null;
+					//
+					Integer ia = null;
+					//
+					if (find(matcher) && NumberUtils.isDigits(s = group(matcher))) {
+						//
+						ia = Integer.valueOf(s);
+						//
+					} // if
+						//
+					Integer ib = null;
+					//
+					if (find(matcher = matcher(pattern, b)) && NumberUtils.isDigits(s = group(matcher))) {
+						//
+						ib = Integer.valueOf(s);
+						//
+					} // if
+						//
+					return ObjectUtils.compare(ia, ib);
+					//
+				});
+				//
+				jPanel1.add(new JComboBox<>(instance.cbmCryptProtect = new DefaultComboBoxModel<>(encodings)),
 						String.format("wmin %1$s,%2$s", 160, wrap));
 				//
-				jPanel1.add(new JLabel("Flags"));
+				jPanel1.add(new JLabel("Input"));
 				//
 				final String growx = "growx";
+				//
+				jPanel1.add(instance.jtcCryptProtectInput = new JTextField(), String.format("%1$s,%2$s", growx, wrap));
+				//
+				jPanel1.add(new JLabel("Flags"));
 				//
 				jPanel1.add(instance.jtcCryptProtectFlags = new JTextField(), String.format("%1$s,%2$s", growx, wrap));
 				//
@@ -352,6 +404,11 @@ public class Win32DpApiUtil extends JPanel {
 				final JPanel jPanel2 = new JPanel();
 				//
 				jPanel2.setLayout(new MigLayout());
+				//
+				jPanel2.add(new JLabel("Encoding"));
+				//
+				jPanel2.add(new JComboBox<>(instance.cbmCryptUnprotect = new DefaultComboBoxModel<>(encodings)),
+						String.format("wmin %1$s,%2$s", 160, wrap));
 				//
 				jPanel2.add(new JLabel("Input"), String.format("wmin %1$s", getWidth(jLabel.getPreferredSize())));
 				//
@@ -406,9 +463,37 @@ public class Win32DpApiUtil extends JPanel {
 			//
 		final String action = get(map, "action");
 		//
-		final Map<String, Class<?>> classMap = collect(filter(
-				map(stream(getTopLevelClasses(from(getContextClassLoader(Thread.currentThread())),
-						"org.apache.commons.codec.binary")), Win32DpApiUtil::load),
+		final Map<String, Class<?>> encodingMap = getEncodingMap(getContextClassLoader(Thread.currentThread()));
+		//
+		if (Objects.equals(action, CRYPT_PROTECT_DATA)) {
+			//
+			cryptProtectData(map, encodingMap);
+			//
+		} else if (Objects.equals(action, "cryptUnprotectData")) {
+			//
+			cryptUnprotectData(map, encodingMap);
+			//
+		} else {
+			//
+			throw new RuntimeException(action);
+			//
+		} // if
+			//
+	}
+
+	private static <K> Set<K> keySet(final Map<K, ?> instance) {
+		return instance != null ? instance.keySet() : null;
+	}
+
+	private static <T> T[] toArray(final Collection<T> instance, final T[] array) {
+		return instance != null ? instance.toArray(array) : null;
+	}
+
+	private static Map<String, Class<?>> getEncodingMap(final ClassLoader classLoader) {
+		//
+		return collect(filter(
+				map(stream(getTopLevelClasses(from(classLoader), "org.apache.commons.codec.binary")),
+						Win32DpApiUtil::load),
 				x -> Boolean.logicalAnd(Boolean.logicalAnd(isAssignableFrom(BinaryEncoder.class, x),
 						isAssignableFrom(BinaryDecoder.class, x)), !isAbstract(x))),
 				Collectors.toMap(x -> {
@@ -433,20 +518,6 @@ public class Win32DpApiUtil extends JPanel {
 					//
 				}, Function.identity()));
 		//
-		if (Objects.equals(action, CRYPT_PROTECT_DATA)) {
-			//
-			cryptProtectData(map, classMap);
-			//
-		} else if (Objects.equals(action, "cryptUnprotectData")) {
-			//
-			cryptUnprotectData(map, classMap);
-			//
-		} else {
-			//
-			throw new RuntimeException(action);
-			//
-		} // if
-			//
 	}
 
 	private static Double getWidth(final Dimension2D instance) {
@@ -727,9 +798,8 @@ public class Win32DpApiUtil extends JPanel {
 			//
 			if (!containsKey(classMap, encoding)) {
 				//
-				throw new RuntimeException(
-						String.format("Please specify the encoding from the following encoding (%1$s). ",
-								classMap != null ? classMap.keySet() : null));
+				throw new RuntimeException(String
+						.format("Please specify the encoding from the following encoding (%1$s). ", keySet(classMap)));
 				//
 			} // if
 				//
@@ -800,9 +870,8 @@ public class Win32DpApiUtil extends JPanel {
 			//
 			if (!containsKey(classMap, encoding)) {
 				//
-				throw new RuntimeException(
-						String.format("Please specify the encoding from the following encoding (%1$s). ",
-								classMap != null ? classMap.keySet() : null));
+				throw new RuntimeException(String
+						.format("Please specify the encoding from the following encoding (%1$s). ", keySet(classMap)));
 				//
 			} // if
 				//
