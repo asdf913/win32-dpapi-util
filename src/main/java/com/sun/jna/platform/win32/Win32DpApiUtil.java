@@ -324,7 +324,7 @@ public class Win32DpApiUtil {
 		return cast(ClassPath.class,
 				testAndApply((a, b) -> isStatic(a) && b != null && b.getParent() != null,
 						testAndApply(x -> IterableUtils.size(x) == 1, ms, x -> IterableUtils.get(x, 0), null),
-						classloader, (a, b) -> Narcissus.invokeStaticMethod(a, b), null));
+						classloader, Narcissus::invokeStaticMethod, null));
 		//
 	}
 
