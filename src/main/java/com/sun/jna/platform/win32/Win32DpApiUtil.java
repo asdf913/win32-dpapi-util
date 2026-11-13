@@ -2,6 +2,7 @@ package com.sun.jna.platform.win32;
 
 import java.awt.Component;
 import java.awt.GraphicsEnvironment;
+import java.awt.geom.Dimension2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -40,7 +41,10 @@ import java.util.stream.Stream;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
+import javax.swing.JTabbedPane;
+import javax.swing.JTextField;
 import javax.swing.WindowConstants;
+import javax.swing.text.JTextComponent;
 
 import org.apache.commons.codec.BinaryDecoder;
 import org.apache.commons.codec.BinaryEncoder;
@@ -95,6 +99,9 @@ public class Win32DpApiUtil extends JPanel {
 	private static int DEFAULT_CRYPT_PROTECT_DATA_FLAGS;
 
 	private static int DEFAULT_CRYPT_UNPROTECT_DATA_FLAGS;
+
+	private JTextComponent jtcCryptProtectInput, jtcCryptUnprotectInput, jtcCryptProtectFlags, jtcCryptUnprotectFlags,
+			jtcCryptProtectEntropy, jtcCryptUnprotectEntropy, jtcCryptProtectDescription = null;
 
 	static {
 		//
@@ -284,7 +291,65 @@ public class Win32DpApiUtil extends JPanel {
 			//
 			instance.setLayout(new MigLayout());
 			//
-			if (!isWindows) {
+			if (isWindows) {
+				//
+				final JTabbedPane jtp = new JTabbedPane();
+				//
+				final JPanel jPanel1 = new JPanel();
+				//
+				jPanel1.setLayout(new MigLayout());
+				//
+				jPanel1.add(new JLabel("Input"));
+				//
+				final String wrap = "wrap";
+				//
+				jPanel1.add(instance.jtcCryptProtectInput = new JTextField(),
+						String.format("wmin %1$s,%2$s", 160, wrap));
+				//
+				jPanel1.add(new JLabel("Flags"));
+				//
+				final String growx = "growx";
+				//
+				jPanel1.add(instance.jtcCryptProtectFlags = new JTextField(), String.format("%1$s,%2$s", growx, wrap));
+				//
+				jPanel1.add(new JLabel("Entropy"));
+				//
+				jPanel1.add(instance.jtcCryptProtectEntropy = new JTextField(),
+						String.format("%1$s,%2$s", growx, wrap));
+				//
+				final JLabel jLabel = new JLabel("Description");
+				//
+				jPanel1.add(jLabel);
+				//
+				jPanel1.add(instance.jtcCryptProtectDescription = new JTextField(),
+						String.format("%1$s,%2$s", growx, wrap));
+				//
+				jtp.add("CryptProtect", jPanel1);
+				//
+				final JPanel jPanel2 = new JPanel();
+				//
+				jPanel2.setLayout(new MigLayout());
+				//
+				jPanel2.add(new JLabel("Input"), String.format("wmin %1$s", getWidth(jLabel.getPreferredSize())));
+				//
+				jPanel2.add(instance.jtcCryptUnprotectInput = new JTextField(),
+						String.format("wmin %1$s,%2$s", 160, wrap));
+				//
+				jPanel2.add(new JLabel("Flags"));
+				//
+				jPanel2.add(instance.jtcCryptUnprotectFlags = new JTextField(),
+						String.format("%1$s,%2$s", growx, wrap));
+				//
+				jPanel2.add(new JLabel("Entropy"));
+				//
+				jPanel2.add(instance.jtcCryptUnprotectEntropy = new JTextField(),
+						String.format("%1$s,%2$s", growx, wrap));
+				//
+				jtp.add("CryptUnprotect", jPanel2);
+				//
+				instance.add(jtp, String.format("wmin %1$s", 219));
+				//
+			} else {
 				//
 				instance.add(new JLabel(message));
 				//
@@ -359,6 +424,10 @@ public class Win32DpApiUtil extends JPanel {
 			//
 		} // if
 			//
+	}
+
+	private static Double getWidth(final Dimension2D instance) {
+		return instance != null ? instance.getWidth() : null;
 	}
 
 	private static void setVisible(final Component instnace, final boolean visible) {

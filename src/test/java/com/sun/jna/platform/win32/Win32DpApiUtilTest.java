@@ -1,6 +1,8 @@
 package com.sun.jna.platform.win32;
 
 import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.geom.Dimension2D;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.RuntimeMXBean;
@@ -397,6 +399,10 @@ class Win32DpApiUtilTest {
 					//
 					add(collection, Narcissus.allocateInstance(JLabel.class));
 					//
+				} else if (Objects.equals(parameterType, Dimension2D.class)) {
+					//
+					add(collection, Narcissus.allocateInstance(Dimension.class));
+					//
 				} else if (parameterType != null && parameterType.isInterface()) {
 					//
 					if ((ih = ObjectUtils.getIfNull(ih, IH::new)) != null) {
@@ -459,7 +465,9 @@ class Win32DpApiUtilTest {
 					|| Boolean.logicalAnd(Objects.equals(name, "encodeToString"),
 							Arrays.equals(parameterTypes, new Class<?>[] { Encoder.class, byte[].class }))
 					|| Boolean.logicalAnd(Objects.equals(name, "getSimpleName"),
-							Arrays.equals(parameterTypes, new Class<?>[] { Class.class }))) {
+							Arrays.equals(parameterTypes, new Class<?>[] { Class.class }))
+					|| Boolean.logicalAnd(Objects.equals(name, "getWidth"),
+							Arrays.equals(parameterTypes, new Class<?>[] { Dimension2D.class }))) {
 				//
 				Assert.assertNotNull(result, toString);
 				//
