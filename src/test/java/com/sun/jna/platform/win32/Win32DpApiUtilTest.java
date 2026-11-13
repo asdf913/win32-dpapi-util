@@ -1,6 +1,7 @@
 package com.sun.jna.platform.win32;
 
 import java.io.File;
+import java.io.IOException;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
@@ -29,6 +30,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
+import org.apache.commons.codec.DecoderException;
+import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.binary.Hex;
 import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
@@ -693,7 +696,8 @@ class Win32DpApiUtilTest {
 	}
 
 	@Test
-	public void testMain() throws Exception {
+	void testMain()
+			throws InstantiationException, IllegalAccessException, IOException, DecoderException, EncoderException {
 		//
 		Win32DpApiUtil.main(new String[] { "gui=true" });
 		//
