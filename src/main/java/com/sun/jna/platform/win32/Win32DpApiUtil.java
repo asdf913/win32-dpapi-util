@@ -118,7 +118,10 @@ public class Win32DpApiUtil extends JPanel {
 	@Note("Flags")
 	private JTextComponent jtcCryptUnprotectFlags = null;
 
-	private JTextComponent jtcCryptProtectEntropy, jtcCryptUnprotectEntropy, jtcCryptProtectDescription = null;
+	@Note("Entropy")
+	private JTextComponent jtcCryptProtectEntropy = null;
+
+	private JTextComponent jtcCryptUnprotectEntropy, jtcCryptProtectDescription = null;
 
 	static {
 		//
