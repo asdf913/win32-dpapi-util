@@ -18,7 +18,13 @@
 <tr><td>action</td><td>cryptProtectData</td><td>&nbsp;</td></tr>
 <tr><td>input</td><td>&nbsp;</td><td rowspan="2"><b>input</b>&nbsp;or&nbsp;<b>file</b></td></tr>
 <tr><td>file</td><td>&nbsp;</td></tr>
-<tr><td>encoding</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td rowspan="7">encoding</td><td rowspan="7">base64</td><td>base16</td></tr>
+<tr><td>base32</td></tr>
+<tr><td>base45</td></tr>
+<tr><td>base58</td></tr>
+<tr><td>base64</td></tr>
+<tr><td>binary</td></tr>
+<tr><td>hex</td></tr>
 <tr><td>flags</td><td>&nbsp;</td><td>&nbsp;</td></tr>
 <tr><td>entropy</td><td>&nbsp;</td><td>Optional</td></tr>
 <tr><td>description</td><td>&nbsp;</td><td>Optional</td></tr>
@@ -41,7 +47,13 @@
 <tr><td>action</td><td>cryptUnprotectData</td></tr>
 <tr><td>input</td><td>&nbsp;</td><td rowspan="2"><b>input</b>&nbsp;or&nbsp;<b>file</b></td></tr>
 <tr><td>file</td><td>&nbsp;</td></tr>
-<tr><td>encoding</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td rowspan="7">encoding</td><td rowspan="7">base64</td><td>base16</td></tr>
+<tr><td>base32</td></tr>
+<tr><td>base45</td></tr>
+<tr><td>base58</td></tr>
+<tr><td>base64</td></tr>
+<tr><td>binary</td></tr>
+<tr><td>hex</td></tr>
 <tr><td>entropy</td><td>&nbsp;</td><td>Optional</td></tr>
 <tr><td>description</td><td>&nbsp;</td><td>Optional</td></tr>
 </tbody>
