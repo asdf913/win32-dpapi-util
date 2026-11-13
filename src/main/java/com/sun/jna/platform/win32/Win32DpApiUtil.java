@@ -323,8 +323,8 @@ public class Win32DpApiUtil extends JPanel {
 		final Map<String, Class<?>> classMap = collect(filter(
 				map(stream(getTopLevelClasses(from(getContextClassLoader(Thread.currentThread())),
 						"org.apache.commons.codec.binary")), Win32DpApiUtil::load),
-				x -> x != null && BinaryEncoder.class.isAssignableFrom(x) && BinaryDecoder.class.isAssignableFrom(x)
-						&& !Modifier.isAbstract(x.getModifiers())),
+				x -> Boolean.logicalAnd(isAssignableFrom(BinaryEncoder.class, x),
+						isAssignableFrom(BinaryDecoder.class, x)) && !isAbstract(x)),
 				Collectors.toMap(x -> {
 					//
 					final String simpleName = getSimpleName(x);
@@ -361,6 +361,14 @@ public class Win32DpApiUtil extends JPanel {
 			//
 		} // if
 			//
+	}
+
+	private static boolean isAbstract(final Class<?> instance) {
+		return instance != null && Modifier.isAbstract(instance.getModifiers());
+	}
+
+	private static boolean isAssignableFrom(final Class<?> a, final Class<?> b) {
+		return a != null && b != null && a.isAssignableFrom(b);
 	}
 
 	private static boolean isTestMode() {

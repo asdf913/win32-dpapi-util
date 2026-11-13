@@ -9,6 +9,7 @@ import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Member;
 import java.lang.reflect.Method;
+import java.util.AbstractMap;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Base64.Encoder;
@@ -53,7 +54,8 @@ class Win32DpApiUtilTest {
 			METHOD_TO_MAP, METHOD_COLLECT, METHOD_GET_ABSOLUTE_PATH, METHOD_ENDS_WITH, METHOD_CONTAINS_KEY,
 			METHOD_GET_PARENT_FILE, METHOD_CRYPT_PROTECT_DATA, METHOD_CRYPT_UNPROTECT_DATA, METHOD_TEST_AND_ACCEPT,
 			METHOD_PUT, METHOD_LOAD, METHOD_GET_CONTEXT_CLASS_LOADER, METHOD_TEST_AND_APPLY,
-			METHOD_GET_TOP_LEVEL_CLASSES, METHOD_MATCHER, METHOD_TO_LOWER_CASE, METHOD_MATCHES, METHOD_FIND = null;
+			METHOD_GET_TOP_LEVEL_CLASSES, METHOD_MATCHER, METHOD_TO_LOWER_CASE, METHOD_MATCHES, METHOD_FIND,
+			METHOD_IS_ABSTRACT, METHOD_IS_ASSIGNABLE_FROM = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -109,6 +111,11 @@ class Win32DpApiUtilTest {
 		(METHOD_MATCHES = clz.getDeclaredMethod("matches", String.class, String.class)).setAccessible(true);
 		//
 		(METHOD_FIND = clz.getDeclaredMethod("find", Matcher.class)).setAccessible(true);
+		//
+		(METHOD_IS_ABSTRACT = clz.getDeclaredMethod("isAbstract", Class.class)).setAccessible(true);
+		//
+		(METHOD_IS_ASSIGNABLE_FROM = clz.getDeclaredMethod("isAssignableFrom", Class.class, Class.class))
+				.setAccessible(true);
 		//
 	}
 
@@ -689,6 +696,28 @@ class Win32DpApiUtilTest {
 	public void testMain() throws Exception {
 		//
 		Win32DpApiUtil.main(new String[] { "gui=true" });
+		//
+	}
+
+	@Test
+	void testIsAbstract() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertEquals(invoke(METHOD_IS_ABSTRACT, null, (Object) null), Boolean.FALSE);
+		//
+		Assert.assertEquals(invoke(METHOD_IS_ABSTRACT, null, String.class), Boolean.FALSE);
+		//
+		Assert.assertEquals(invoke(METHOD_IS_ABSTRACT, null, AbstractMap.class), Boolean.TRUE);
+		//
+	}
+
+	@Test
+	void testIsAssignableFrom() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertEquals(invoke(METHOD_IS_ASSIGNABLE_FROM, null, Object.class, null), Boolean.FALSE);
+		//
+		Assert.assertEquals(invoke(METHOD_IS_ASSIGNABLE_FROM, null, Object.class, Object.class), Boolean.TRUE);
+		//
+		Assert.assertEquals(invoke(METHOD_IS_ASSIGNABLE_FROM, null, String.class, Object.class), Boolean.FALSE);
 		//
 	}
 
