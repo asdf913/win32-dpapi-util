@@ -1,5 +1,6 @@
 package com.sun.jna.platform.win32;
 
+import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
@@ -7,6 +8,8 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.management.ManagementFactory;
+import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -32,6 +35,11 @@ import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.swing.JFrame;
+import javax.swing.JLabel;
+import javax.swing.JPanel;
+import javax.swing.WindowConstants;
+
 import org.apache.commons.codec.BinaryDecoder;
 import org.apache.commons.codec.BinaryEncoder;
 import org.apache.commons.codec.DecoderException;
@@ -39,6 +47,7 @@ import org.apache.commons.codec.EncoderException;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
+import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableBiConsumer;
@@ -58,8 +67,11 @@ import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.ClassPath.ClassInfo;
 
 import io.github.toolfactory.narcissus.Narcissus;
+import net.miginfocom.swing.MigLayout;
 
-public class Win32DpApiUtil {
+public class Win32DpApiUtil extends JPanel {
+
+	private static final long serialVersionUID = 823115347964369539L;
 
 	private static final Logger LOG = LoggerFactory.getLogger(Win32DpApiUtil.class);
 
@@ -258,16 +270,54 @@ public class Win32DpApiUtil {
 	public static void main(final String[] args)
 			throws IOException, DecoderException, InstantiationException, IllegalAccessException, EncoderException {
 		//
-		if (!isWindows()) {
+		final Map<String, String> map = toMap(args);
+		//
+		final boolean isWindows = isWindows();
+		//
+		final String message = "Please run under Microsoft Windows";
+		//
+		if (Boolean.logicalOr(isGui(), Objects.equals(get(map, "gui"), "true"))) {
 			//
-			info(LOG, "Please run under Microsoft Windows");
+			final Win32DpApiUtil instance = new Win32DpApiUtil();
+			//
+			instance.setLayout(new MigLayout());
+			//
+			if (!isWindows) {
+				//
+				instance.add(new JLabel(message));
+				//
+			} // if
+				//
+			final JFrame jFrame = !GraphicsEnvironment.isHeadless() ? new JFrame() : null;
+			//
+			if (jFrame != null) {
+				//
+				jFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
+				//
+				jFrame.add(instance);
+				//
+				jFrame.pack();
+				//
+				if (!isTestMode()) {
+					//
+					jFrame.setVisible(true);
+					//
+				} // if
+					//
+			} // if
+				//
+			return;
+			//
+		} // if
+			//
+		if (!isWindows) {
+			//
+			info(LOG, message);
 			//
 			return;
 			//
 		} // if
 			//
-		final Map<String, String> map = toMap(args);
-		//
 		final String action = get(map, "action");
 		//
 		final Map<String, Class<?>> classMap = collect(filter(
@@ -311,6 +361,44 @@ public class Win32DpApiUtil {
 			//
 		} // if
 			//
+	}
+
+	private static boolean isTestMode() {
+		try {
+			return Class.forName("org.testng.annotations.Test") != null;
+		} catch (final ClassNotFoundException e) {
+			return false;
+		}
+	}
+
+	private static boolean isGui() {
+		//
+		if (Objects.equals(getName(getClass(FileSystems.getDefault())), "sun.nio.fs.MacOSXFileSystem")) {
+			//
+			return System.console() == null;
+			//
+		} // if
+			//
+		if (isWindows()) {
+			//
+			final Matcher matcher = matcher(Pattern.compile("\\d+"), getName(ManagementFactory.getRuntimeMXBean()));
+			//
+			if (find(matcher)) {
+				//
+				return BooleanUtils.toBooleanDefaultIfNull(testAndApply(NumberUtils::isDigits, group(matcher),
+						x -> endsWith(Kernel32Util.QueryFullProcessImageName(NumberUtils.toInt(x), 0), "javaw.exe"),
+						null), false);
+				//
+			} // if
+				//
+		} // if
+			//
+		return false;
+		//
+	}
+
+	private static String getName(final RuntimeMXBean instance) {
+		return instance != null ? instance.getName() : null;
 	}
 
 	private static ClassPath from(final ClassLoader classloader) {

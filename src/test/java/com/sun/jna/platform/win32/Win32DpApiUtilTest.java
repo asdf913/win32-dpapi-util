@@ -1,6 +1,7 @@
 package com.sun.jna.platform.win32;
 
 import java.io.File;
+import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
@@ -184,6 +185,10 @@ class Win32DpApiUtilTest {
 				return null;
 				//
 			} else if (proxy instanceof MatchResult && Objects.equals(name, "group")) {
+				//
+				return null;
+				//
+			} else if (proxy instanceof RuntimeMXBean && Objects.equals(name, "getName")) {
 				//
 				return null;
 				//
@@ -677,6 +682,13 @@ class Win32DpApiUtilTest {
 		Assert.assertEquals(invoke(METHOD_FIND, null, invoke(METHOD_MATCHER, null, pattern, "")), Boolean.FALSE);
 		//
 		Assert.assertEquals(invoke(METHOD_FIND, null, invoke(METHOD_MATCHER, null, pattern, "1")), Boolean.TRUE);
+		//
+	}
+
+	@Test
+	public void testMain() throws Exception {
+		//
+		Win32DpApiUtil.main(new String[] { "gui=true" });
 		//
 	}
 
