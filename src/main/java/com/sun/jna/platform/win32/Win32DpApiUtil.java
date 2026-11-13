@@ -109,7 +109,10 @@ public class Win32DpApiUtil extends JPanel {
 	@Note("Input")
 	private JTextComponent jtcCryptProtectInput = null;
 
-	private JTextComponent jtcCryptUnprotectInput, jtcCryptProtectFlags, jtcCryptUnprotectFlags, jtcCryptProtectEntropy,
+	@Note("Input")
+	private JTextComponent jtcCryptUnprotectInput = null;
+
+	private JTextComponent jtcCryptProtectFlags, jtcCryptUnprotectFlags, jtcCryptProtectEntropy,
 			jtcCryptUnprotectEntropy, jtcCryptProtectDescription = null;
 
 	static {
