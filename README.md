@@ -11,12 +11,17 @@
 <pre>[main] [INFO ] [Win32DpApiUtil.info(Win32DpApiUtil.java:329)]: AQAAANCMnd8BFdERjHoAwE/Cl+sBAAAADGlfyr9wSU2PAbkwpUQwggAAAAACAAAAAAAQZgAAAAEAACAAAADmsO9TjtL95tyr20TJO9p8SYQacIAwZhmPcSBUx3oMhQAAAAAOgAAAAAIAACAAAAAvCHn4YmVF0tvG8GAokzEOQyAjoORT4o6oesTVYF7URBAAAACau2Tq8X/DBjyq6vKclVRHQAAAADqNfw5zCgzKrTXwassrPDVltRGQRTsr76YAeBY/CH3BfXzUw/uBKVTcgX9KBg+5LLsCpDlLv9gxIHGgwTMQof0=</pre>
 
 <table>
+<thead>
+<tr><th>Parameter</th><th>Default&nbsp;Value</th><th>Remark</th></tr>
+</thead>
 <tbody>
-<tr><td>input</td></tr>
-<tr><td>file</td></tr>
-<tr><td>encoding</td></tr>
-<tr><td>flags</td></tr>
-<tr><td>entropy</td></tr>
+<tr><td>action</td><td>cryptProtectData</td><td>&nbsp;</td></tr>
+<tr><td>input</td><td>&nbsp;</td><td rowspan="2"><b>input</b>&nbsp;or&nbsp;<b>file</b></td></tr>
+<tr><td>file</td><td>&nbsp;</td></tr>
+<tr><td>encoding</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>flags</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>entropy</td><td>&nbsp;</td><td>Optional</td></tr>
+<tr><td>description</td><td>&nbsp;</td><td>Optional</td></tr>
 </tbody>
 </table>
 
@@ -29,13 +34,16 @@
 <pre>[main] [INFO ] [Win32DpApiUtil.info(Win32DpApiUtil.java:329)]: 12345</pre>
 
 <table>
+<thead>
+<tr><th>Parameter</th><th>Default&nbsp;Value</th><th>Remark</th></tr>
+</thead>
 <tbody>
-<tr><td>input</td></tr>
-<tr><td>file</td></tr>
-<tr><td>encoding</td></tr>
-<tr><td>flags</td></tr>
-<tr><td>entropy</td></tr>
-<tr><td>description</td></tr>
+<tr><td>action</td><td>cryptUnprotectData</td></tr>
+<tr><td>input</td><td>&nbsp;</td><td rowspan="2"><b>input</b>&nbsp;or&nbsp;<b>file</b></td></tr>
+<tr><td>file</td><td>&nbsp;</td></tr>
+<tr><td>encoding</td><td>&nbsp;</td><td>&nbsp;</td></tr>
+<tr><td>entropy</td><td>&nbsp;</td><td>Optional</td></tr>
+<tr><td>description</td><td>&nbsp;</td><td>Optional</td></tr>
 </tbody>
 </table>
 
