@@ -7,17 +7,21 @@ import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
+import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.nio.file.FileSystems;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -267,7 +271,7 @@ public class Win32DpApiUtil {
 		final String action = get(map, "action");
 		//
 		final Map<String, Class<?>> classMap = collect(filter(
-				map(stream(getTopLevelClasses(ClassPath.from(getContextClassLoader(Thread.currentThread())),
+				map(stream(getTopLevelClasses(from(getContextClassLoader(Thread.currentThread())),
 						"org.apache.commons.codec.binary")), Win32DpApiUtil::load),
 				x -> x != null && BinaryEncoder.class.isAssignableFrom(x) && BinaryDecoder.class.isAssignableFrom(x)
 						&& !Modifier.isAbstract(x.getModifiers())),
@@ -307,6 +311,54 @@ public class Win32DpApiUtil {
 			//
 		} // if
 			//
+	}
+
+	private static ClassPath from(final ClassLoader classloader) throws IOException {
+		//
+		final List<Method> ms = collect(
+				filter(testAndApply(Objects::nonNull, ClassPath.class.getDeclaredMethods(), Arrays::stream, null),
+						x -> Boolean.logicalAnd(Objects.equals(getName(x), "from"),
+								Arrays.equals(getParameterTypes(x), new Class<?>[] { ClassLoader.class }))),
+				Collectors.toList());
+		//
+		return cast(ClassPath.class,
+				testAndApply((a, b) -> isStatic(a) && b != null && b.getParent() != null,
+						testAndApply(x -> IterableUtils.size(x) == 1, ms, x -> IterableUtils.get(x, 0), null),
+						classloader, (a, b) -> Narcissus.invokeStaticMethod(a, b), null));
+		//
+	}
+
+	private static Class<?>[] getParameterTypes(final Executable instance) {
+		//
+		if (instance == null) {
+			//
+			return null;
+			//
+		} // if
+			//
+		final Stream<Field> stream = testAndApply(Objects::nonNull,
+				testAndApply(Objects::nonNull, getClass(instance), Narcissus::getDeclaredFields, null), Arrays::stream,
+				null);
+		//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(stream, x -> Objects.equals(getName(x), "parameterTypes")), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		return field == null || Narcissus.getField(instance, field) != null ? instance.getParameterTypes() : null;
+		//
+	}
+
+	private static <T, U, R> R testAndApply(final BiPredicate<T, U> predicate, final T t, final U u,
+			final BiFunction<T, U, R> functionTrue, final BiFunction<T, U, R> functionFalse) {
+		return (predicate != null && predicate.test(t, u)) ? apply(functionTrue, t, u) : apply(functionFalse, t, u);
+	}
+
+	private static <T, U, R> R apply(final BiFunction<T, U, R> instance, final T t, final U u) {
+		return instance != null ? instance.apply(t, u) : null;
+	}
+
+	private static boolean isStatic(final Member instance) {
+		return instance != null && Modifier.isStatic(instance.getModifiers());
 	}
 
 	private static String group(final MatchResult instance) {

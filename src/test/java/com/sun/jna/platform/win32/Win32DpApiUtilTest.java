@@ -2,6 +2,7 @@ package com.sun.jna.platform.win32;
 
 import java.io.File;
 import java.lang.reflect.Array;
+import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.InvocationHandler;
 import java.lang.reflect.InvocationTargetException;
@@ -17,6 +18,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
+import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
 import java.util.regex.MatchResult;
@@ -113,6 +115,8 @@ class Win32DpApiUtilTest {
 
 		private Boolean test, containsKey = null;
 
+		private Integer modifiers = null;
+
 		@Override
 		public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
 			//
@@ -124,10 +128,18 @@ class Win32DpApiUtilTest {
 				//
 			final String name = getName(method);
 			//
-			if (proxy instanceof Member && Objects.equals(name, "getName")) {
+			if (proxy instanceof Member) {
 				//
-				return null;
-				//
+				if (Objects.equals(name, "getName")) {
+					//
+					return null;
+					//
+				} else if (Objects.equals(name, "getModifiers")) {
+					//
+					return modifiers;
+					//
+				} // if
+					//
 			} else if (proxy instanceof Map) {
 				//
 				if (contains(Arrays.asList("get", "put"), name)) {
@@ -149,7 +161,9 @@ class Win32DpApiUtilTest {
 				//
 				return null;
 				//
-			} else if (proxy instanceof FailableFunction && Objects.equals(name, "apply")) {
+			} else if (Boolean.logicalAnd(
+					Boolean.logicalOr(proxy instanceof FailableFunction, proxy instanceof BiFunction),
+					Objects.equals(name, "apply"))) {
 				//
 				return null;
 				//
@@ -338,6 +352,14 @@ class Win32DpApiUtilTest {
 					//
 					add(collection, Character.valueOf(' '));
 					//
+				} else if (Objects.equals(parameterType, ClassLoader.class)) {
+					//
+					add(collection, Narcissus.allocateInstance(getClass(ClassLoader.getSystemClassLoader())));
+					//
+				} else if (Objects.equals(parameterType, Executable.class)) {
+					//
+					add(collection, Narcissus.allocateInstance(Method.class));
+					//
 				} else if (parameterType != null && parameterType.isInterface()) {
 					//
 					if ((ih = ObjectUtils.getIfNull(ih, IH::new)) != null) {
@@ -345,6 +367,8 @@ class Win32DpApiUtilTest {
 						final List<Field> fs = FieldUtils.getAllFieldsList(getClass(ih));
 						//
 						Field f = null;
+						//
+						Class<?> type = null;
 						//
 						for (int k = 0; k < IterableUtils.size(fs); k++) {
 							//
@@ -354,9 +378,13 @@ class Win32DpApiUtilTest {
 								//
 							} // if
 								//
-							if (Objects.equals(f.getType(), Boolean.class)) {
+							if (Objects.equals(type = f.getType(), Boolean.class)) {
 								//
 								Narcissus.setField(ih, f, Boolean.TRUE);
+								//
+							} else if (Objects.equals(type, Integer.class)) {
+								//
+								Narcissus.setField(ih, f, Integer.valueOf(0));
 								//
 							} // if
 								//
