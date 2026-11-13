@@ -340,41 +340,7 @@ public class Win32DpApiUtil extends JPanel {
 				//
 				final String[] encodings = toArray(keySet(encodingMap), new String[] {});
 				//
-				Arrays.sort(encodings, (a, b) -> {
-					//
-					final int compare = Integer.compare(StringUtils.length(a), StringUtils.length(b));
-					//
-					if (compare < 0) {
-						//
-						return compare;
-						//
-					} // if
-						//
-					final Pattern pattern = Pattern.compile("\\d+");
-					//
-					Matcher matcher = matcher(pattern, a);
-					//
-					String s = null;
-					//
-					Integer ia = null;
-					//
-					if (find(matcher) && NumberUtils.isDigits(s = group(matcher))) {
-						//
-						ia = Integer.valueOf(s);
-						//
-					} // if
-						//
-					Integer ib = null;
-					//
-					if (find(matcher = matcher(pattern, b)) && NumberUtils.isDigits(s = group(matcher))) {
-						//
-						ib = Integer.valueOf(s);
-						//
-					} // if
-						//
-					return ObjectUtils.compare(ia, ib);
-					//
-				});
+				Arrays.sort(encodings, Win32DpApiUtil::compare);
 				//
 				jPanel1.add(new JComboBox<>(instance.cbmCryptProtect = new DefaultComboBoxModel<>(encodings)),
 						String.format("wmin %1$s,%2$s", 160, wrap));
@@ -481,6 +447,54 @@ public class Win32DpApiUtil extends JPanel {
 			//
 		} // if
 			//
+	}
+
+	private static int compare(final String a, final String b) {
+		//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(stream(testAndApply(Objects::nonNull, getClass(a), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), VALUE)), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		if (field != null
+				&& Boolean.logicalOr(Narcissus.getField(a, field) == null, Narcissus.getField(b, field) == null)) {
+			//
+			return 0;
+			//
+		} // if
+			//
+		final int compare = Integer.compare(StringUtils.length(a), StringUtils.length(b));
+		//
+		if (compare < 0) {
+			//
+			return compare;
+			//
+		} // if
+			//
+		final Pattern pattern = Pattern.compile("\\d+");
+		//
+		Matcher matcher = matcher(pattern, a);
+		//
+		String s = null;
+		//
+		Integer ia = null;
+		//
+		if (find(matcher) && NumberUtils.isDigits(s = group(matcher))) {
+			//
+			ia = Integer.valueOf(s);
+			//
+		} // if
+			//
+		Integer ib = null;
+		//
+		if (find(matcher = matcher(pattern, b)) && NumberUtils.isDigits(s = group(matcher))) {
+			//
+			ib = Integer.valueOf(s);
+			//
+		} // if
+			//
+		return ObjectUtils.compare(ia, ib);
+		//
 	}
 
 	private static <K> Set<K> keySet(final Map<K, ?> instance) {
@@ -660,7 +674,7 @@ public class Win32DpApiUtil extends JPanel {
 
 	private static Matcher matcher(final Pattern instance, final String input) {
 		//
-		if (instance == null) {
+		if (Boolean.logicalOr(instance == null, input == null)) {
 			//
 			return null;
 			//
