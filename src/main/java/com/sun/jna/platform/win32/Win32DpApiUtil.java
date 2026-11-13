@@ -9,25 +9,29 @@ import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
+import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
 import java.nio.file.FileSystems;
 import java.util.Arrays;
-import java.util.Base64;
-import java.util.Base64.Decoder;
-import java.util.Base64.Encoder;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.BiPredicate;
+import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import org.apache.commons.codec.BinaryDecoder;
+import org.apache.commons.codec.BinaryEncoder;
 import org.apache.commons.codec.DecoderException;
-import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.codec.EncoderException;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.commons.lang3.ArrayUtils;
@@ -44,6 +48,10 @@ import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Opcodes;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import com.google.common.collect.ImmutableSet;
+import com.google.common.reflect.ClassPath;
+import com.google.common.reflect.ClassPath.ClassInfo;
 
 import io.github.toolfactory.narcissus.Narcissus;
 
@@ -243,7 +251,8 @@ public class Win32DpApiUtil {
 		//
 	}
 
-	public static void main(final String[] args) throws IOException, DecoderException {
+	public static void main(final String[] args)
+			throws IOException, DecoderException, InstantiationException, IllegalAccessException, EncoderException {
 		//
 		if (!isWindows()) {
 			//
@@ -257,13 +266,40 @@ public class Win32DpApiUtil {
 		//
 		final String action = get(map, "action");
 		//
+		final Map<String, Class<?>> classMap = collect(filter(
+				map(stream(getTopLevelClasses(ClassPath.from(getContextClassLoader(Thread.currentThread())),
+						"org.apache.commons.codec.binary")), Win32DpApiUtil::load),
+				x -> x != null && BinaryEncoder.class.isAssignableFrom(x) && BinaryDecoder.class.isAssignableFrom(x)
+						&& !Modifier.isAbstract(x.getModifiers())),
+				Collectors.toMap(x -> {
+					//
+					final String simpleName = getSimpleName(x);
+					//
+					if (matches(simpleName, "^\\w+\\d{2}$")) {
+						//
+						return toLowerCase(simpleName);
+						//
+					} // if
+						//
+					final Matcher matcher = matcher(Pattern.compile("([A-Z][a-z]+)"), simpleName);
+					//
+					if (find(matcher)) {
+						//
+						return toLowerCase(group(matcher));
+						//
+					} // if
+						//
+					return simpleName;
+					//
+				}, Function.identity()));
+		//
 		if (Objects.equals(action, CRYPT_PROTECT_DATA)) {
 			//
-			cryptProtectData(map);
+			cryptProtectData(map, classMap);
 			//
 		} else if (Objects.equals(action, "cryptUnprotectData")) {
 			//
-			cryptUnprotectData(map);
+			cryptUnprotectData(map, classMap);
 			//
 		} else {
 			//
@@ -273,13 +309,154 @@ public class Win32DpApiUtil {
 			//
 	}
 
+	private static String group(final MatchResult instance) {
+		return instance != null ? instance.group() : null;
+	}
+
+	private static boolean find(final Matcher instance) {
+		//
+		if (instance == null) {
+			//
+			return false;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), "groups")), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		return (field == null || Narcissus.getField(instance, field) != null) && instance.find();
+		//
+	}
+
+	private static Matcher matcher(final Pattern instance, final String input) {
+		//
+		if (instance == null) {
+			//
+			return null;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), "normalizedPattern")), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		return (field == null || Narcissus.getField(instance, field) != null) ? instance.matcher(input) : null;
+		//
+	}
+
+	private static String toLowerCase(final String instance) {
+		//
+		if (instance == null) {
+			//
+			return instance;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), VALUE)), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		return (field == null || Narcissus.getField(instance, field) != null) ? instance.toLowerCase() : null;
+		//
+	}
+
+	private static boolean matches(final String instance, final String regex) {
+		//
+		if (instance == null) {
+			//
+			return false;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), VALUE)), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		if (field != null && Narcissus.getField(regex, field) == null) {
+			//
+			return false;
+			//
+		} // if
+			//
+		return (field == null || Narcissus.getField(instance, field) != null) && instance.matches(regex);
+		//
+	}
+
+	private static String getSimpleName(final Class<?> instance) {
+		return instance != null ? instance.getSimpleName() : null;
+	}
+
+	private static Class<?> load(final ClassInfo instance) {
+		//
+		if (instance == null) {
+			//
+			return null;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), "loader")), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		return field == null || Narcissus.getField(instance, field) != null ? instance.load() : null;
+		//
+	}
+
+	private static <T, R> Stream<R> map(final Stream<T> instance, final Function<? super T, ? extends R> mapper) {
+		return instance != null ? instance.map(mapper) : null;
+	}
+
+	private static ImmutableSet<ClassInfo> getTopLevelClasses(final ClassPath instance, final String packageName) {
+		//
+		if (instance == null || packageName == null) {
+			//
+			return null;
+			//
+		} // if
+			//
+		Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(stream(
+						testAndApply(Objects::nonNull, getClass(packageName), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), VALUE)), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		if (field != null && Narcissus.getField(packageName, field) == null) {
+			//
+			return null;
+			//
+		} // if
+			//
+		return (field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), "resources")), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null)) == null || Narcissus.getField(instance, field) != null
+						? instance.getTopLevelClasses(packageName)
+						: null;
+		//
+	}
+
+	private static ClassLoader getContextClassLoader(final Thread instance) {
+		return instance != null ? instance.getContextClassLoader() : null;
+	}
+
 	private static boolean isWindows() {
 		return Objects.equals(getName(getClass(FileSystems.getDefault())), "sun.nio.fs.WindowsFileSystem");
 	}
 
-	private static void cryptProtectData(final Map<String, String> map) throws IOException {
-		//
-		final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
+	private static void cryptProtectData(final Map<String, String> map, final Map<String, Class<?>> classMap)
+			throws IOException, InstantiationException, IllegalAccessException, EncoderException {
 		//
 		final Integer flags = testAndApply(x -> containsKey(map, x), "flags",
 				x -> testAndApply(NumberUtils::isDigits, get(map, x), Integer::valueOf, null), null);
@@ -292,20 +469,23 @@ public class Win32DpApiUtil {
 			//
 			final byte[] bs = cryptProtectData(getBytes(get(map, INPUT)), entropy, flags, description);
 			//
-			if (Objects.equals(encoding, BASE64)) {
+			final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
+			//
+			if (!containsKey(classMap, encoding)) {
 				//
-				info(LOG, testAndApply(Objects::nonNull, bs, x -> encodeToString(Base64.getEncoder(), x), null));
-				//
-			} else if (Objects.equals(encoding, "hex")) {
-				//
-				info(LOG, testAndApply(Objects::nonNull, bs, Hex::encodeHexString, null));
-				//
-			} else {
-				//
-				throw new RuntimeException(encoding);
+				throw new RuntimeException(
+						String.format("Please specify the encoding from the following encoding (%1$s). ",
+								classMap != null ? classMap.keySet() : null));
 				//
 			} // if
 				//
+			final Class<?> clz = get(classMap, encoding);
+			//
+			final BinaryEncoder binaryEncoder = cast(BinaryEncoder.class, clz != null ? clz.newInstance() : null);
+			//
+			info(LOG, testAndApply(Objects::nonNull,
+					binaryEncoder != null && bs != null ? binaryEncoder.encode(bs) : null, String::new, null));
+			//
 		} else if (containsKey(map, "file")) {
 			//
 			final File f = testAndApply(Objects::nonNull, get(map, "file"), File::new, null);
@@ -352,9 +532,8 @@ public class Win32DpApiUtil {
 		//
 	}
 
-	private static void cryptUnprotectData(final Map<String, String> map) throws IOException, DecoderException {
-		//
-		final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
+	private static void cryptUnprotectData(final Map<String, String> map, final Map<String, Class<?>> classMap)
+			throws IOException, DecoderException, InstantiationException, IllegalAccessException {
 		//
 		final Integer flags = testAndApply(x -> containsKey(map, x), "flags",
 				x -> testAndApply(NumberUtils::isDigits, get(map, x), Integer::valueOf, null), null);
@@ -363,8 +542,22 @@ public class Win32DpApiUtil {
 		//
 		if (containsKey(map, INPUT)) {
 			//
+			final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
+			//
+			if (!containsKey(classMap, encoding)) {
+				//
+				throw new RuntimeException(
+						String.format("Please specify the encoding from the following encoding (%1$s). ",
+								classMap != null ? classMap.keySet() : null));
+				//
+			} // if
+				//
+			final Class<?> clz = get(classMap, encoding);
+			//
 			info(LOG, testAndApply(Objects::nonNull,
-					cryptUnprotectData(toByteArray(get(map, INPUT), encoding), entropy, flags), String::new, null));
+					cryptUnprotectData(toByteArray(get(map, INPUT),
+							cast(BinaryDecoder.class, clz != null ? clz.newInstance() : null)), entropy, flags),
+					String::new, null));
 			//
 		} else if (containsKey(map, "file")) {
 			//
@@ -435,7 +628,12 @@ public class Win32DpApiUtil {
 		//
 	}
 
-	private static byte[] toByteArray(final String instance, final String encoding) throws DecoderException {
+	private static <T> T cast(final Class<T> clz, final Object instance) {
+		return clz != null && clz.isInstance(instance) ? clz.cast(instance) : null;
+	}
+
+	private static byte[] toByteArray(final String instance, final BinaryDecoder binaryDecoder)
+			throws DecoderException {
 		//
 		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
 				collect(filter(
@@ -449,23 +647,7 @@ public class Win32DpApiUtil {
 			//
 		} // if
 			//
-		byte[] bs = null;
-		//
-		if (Objects.equals(encoding, BASE64)) {
-			//
-			bs = testAndApply(Objects::nonNull, instance, x -> decode(Base64.getDecoder(), x), null);
-			//
-		} else if (Objects.equals(encoding, "hex")) {
-			//
-			bs = testAndApply(Objects::nonNull, instance, Hex::decodeHex, null);
-			//
-		} else {
-			//
-			throw new RuntimeException(encoding);
-			//
-		} // if
-			//
-		return bs;
+		return binaryDecoder != null ? binaryDecoder.decode(getBytes(instance)) : null;
 		//
 	}
 
@@ -529,28 +711,6 @@ public class Win32DpApiUtil {
 		if (instance != null) {
 			instance.info(format, arg);
 		}
-	}
-
-	private static byte[] decode(final Decoder instance, final String string) {
-		//
-		if (instance == null || string == null) {
-			//
-			return null;
-			//
-		} // if
-			//
-		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
-				collect(filter(
-						stream(testAndApply(Objects::nonNull, getClass(string), FieldUtils::getAllFieldsList, null)),
-						f -> Objects.equals(getName(f), VALUE)), Collectors.toList()),
-				x -> IterableUtils.get(x, 0), null);
-		//
-		return field == null || Narcissus.getField(string, field) != null ? instance.decode(string) : null;
-		//
-	}
-
-	private static String encodeToString(final Encoder instance, final byte[] bs) {
-		return instance != null && bs != null ? instance.encodeToString(bs) : null;
 	}
 
 	private static byte[] getBytes(final String instance) {

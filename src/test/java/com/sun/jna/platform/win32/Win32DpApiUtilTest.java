@@ -9,8 +9,6 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Base64;
-import java.util.Base64.Decoder;
 import java.util.Base64.Encoder;
 import java.util.Collection;
 import java.util.Collections;
@@ -21,9 +19,14 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.regex.MatchResult;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
+import org.apache.commons.codec.binary.Hex;
+import org.apache.commons.collections4.CollectionUtils;
 import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
@@ -35,16 +38,19 @@ import org.testng.annotations.BeforeClass;
 import org.testng.annotations.BeforeMethod;
 import org.testng.annotations.Test;
 
+import com.google.common.reflect.ClassPath.ClassInfo;
+import com.google.common.reflect.ClassPath;
 import com.google.common.reflect.Reflection;
 
 import io.github.toolfactory.narcissus.Narcissus;
 
 class Win32DpApiUtilTest {
 
-	private static Method METHOD_GET_NAME_MEMBER, METHOD_GET_NAME_FILE, METHOD_GET_CLASS, METHOD_DECODE,
-			METHOD_ENCODE_TO_STRING, METHOD_GET_BYTES, METHOD_TO_MAP, METHOD_COLLECT, METHOD_GET_ABSOLUTE_PATH,
-			METHOD_ENDS_WITH, METHOD_CONTAINS_KEY, METHOD_GET_PARENT_FILE, METHOD_CRYPT_PROTECT_DATA,
-			METHOD_CRYPT_UNPROTECT_DATA, METHOD_TEST_AND_ACCEPT, METHOD_PUT = null;
+	private static Method METHOD_GET_NAME_MEMBER, METHOD_GET_NAME_FILE, METHOD_GET_CLASS, METHOD_GET_BYTES,
+			METHOD_TO_MAP, METHOD_COLLECT, METHOD_GET_ABSOLUTE_PATH, METHOD_ENDS_WITH, METHOD_CONTAINS_KEY,
+			METHOD_GET_PARENT_FILE, METHOD_CRYPT_PROTECT_DATA, METHOD_CRYPT_UNPROTECT_DATA, METHOD_TEST_AND_ACCEPT,
+			METHOD_PUT, METHOD_LOAD, METHOD_GET_CONTEXT_CLASS_LOADER, METHOD_TEST_AND_APPLY,
+			METHOD_GET_TOP_LEVEL_CLASSES, METHOD_MATCHER, METHOD_TO_LOWER_CASE, METHOD_MATCHES, METHOD_FIND = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -56,11 +62,6 @@ class Win32DpApiUtilTest {
 		(METHOD_GET_NAME_FILE = clz.getDeclaredMethod("getName", File.class)).setAccessible(true);
 		//
 		(METHOD_GET_CLASS = clz.getDeclaredMethod("getClass", Object.class)).setAccessible(true);
-		//
-		(METHOD_DECODE = clz.getDeclaredMethod("decode", Decoder.class, String.class)).setAccessible(true);
-		//
-		(METHOD_ENCODE_TO_STRING = clz.getDeclaredMethod("encodeToString", Encoder.class, byte[].class))
-				.setAccessible(true);
 		//
 		(METHOD_GET_BYTES = clz.getDeclaredMethod("getBytes", String.class)).setAccessible(true);
 		//
@@ -76,14 +77,35 @@ class Win32DpApiUtilTest {
 		//
 		(METHOD_GET_PARENT_FILE = clz.getDeclaredMethod("getParentFile", File.class)).setAccessible(true);
 		//
-		(METHOD_CRYPT_PROTECT_DATA = clz.getDeclaredMethod("cryptProtectData", Map.class)).setAccessible(true);
+		(METHOD_CRYPT_PROTECT_DATA = clz.getDeclaredMethod("cryptProtectData", Map.class, Map.class))
+				.setAccessible(true);
 		//
-		(METHOD_CRYPT_UNPROTECT_DATA = clz.getDeclaredMethod("cryptUnprotectData", Map.class)).setAccessible(true);
+		(METHOD_CRYPT_UNPROTECT_DATA = clz.getDeclaredMethod("cryptUnprotectData", Map.class, Map.class))
+				.setAccessible(true);
 		//
 		(METHOD_TEST_AND_ACCEPT = clz.getDeclaredMethod("testAndAccept", BiPredicate.class, Object.class, Object.class,
 				FailableBiConsumer.class)).setAccessible(true);
 		//
 		(METHOD_PUT = clz.getDeclaredMethod("put", Map.class, Object.class, Object.class)).setAccessible(true);
+		//
+		(METHOD_LOAD = clz.getDeclaredMethod("load", ClassInfo.class)).setAccessible(true);
+		//
+		(METHOD_GET_CONTEXT_CLASS_LOADER = clz.getDeclaredMethod("getContextClassLoader", Thread.class))
+				.setAccessible(true);
+		//
+		(METHOD_TEST_AND_APPLY = clz.getDeclaredMethod("testAndApply", Predicate.class, Object.class,
+				FailableFunction.class, FailableFunction.class)).setAccessible(true);
+		//
+		(METHOD_GET_TOP_LEVEL_CLASSES = clz.getDeclaredMethod("getTopLevelClasses", ClassPath.class, String.class))
+				.setAccessible(true);
+		//
+		(METHOD_MATCHER = clz.getDeclaredMethod("matcher", Pattern.class, String.class)).setAccessible(true);
+		//
+		(METHOD_TO_LOWER_CASE = clz.getDeclaredMethod("toLowerCase", String.class)).setAccessible(true);
+		//
+		(METHOD_MATCHES = clz.getDeclaredMethod("matches", String.class, String.class)).setAccessible(true);
+		//
+		(METHOD_FIND = clz.getDeclaredMethod("find", Matcher.class)).setAccessible(true);
 		//
 	}
 
@@ -133,7 +155,7 @@ class Win32DpApiUtilTest {
 				//
 			} else if (proxy instanceof Stream) {
 				//
-				if (Objects.equals(name, "collect")) {
+				if (contains(Arrays.asList("collect", "map"), name)) {
 					//
 					return null;
 					//
@@ -144,6 +166,10 @@ class Win32DpApiUtilTest {
 				} // if
 					//
 			} else if (proxy instanceof Collection && Objects.equals(name, "stream")) {
+				//
+				return null;
+				//
+			} else if (proxy instanceof MatchResult && Objects.equals(name, "group")) {
 				//
 				return null;
 				//
@@ -230,7 +256,7 @@ class Win32DpApiUtilTest {
 			toString = Objects.toString(m);
 			//
 			if (Boolean.logicalAnd(contains(Arrays.asList("cryptProtectData", "cryptUnprotectData"), name = getName(m)),
-					Arrays.equals(parameterTypes = m.getParameterTypes(), new Class<?>[] { Map.class }))
+					Arrays.equals(parameterTypes = m.getParameterTypes(), new Class<?>[] { Map.class, Map.class }))
 					|| Boolean.logicalAnd(Objects.equals(name, "toByteArray"),
 							Arrays.equals(parameterTypes, new Class<?>[] { String.class, String.class }))) {
 				//
@@ -366,7 +392,9 @@ class Win32DpApiUtilTest {
 					|| Boolean.logicalAnd(Objects.equals(name, "filter"),
 							Arrays.equals(parameterTypes, new Class<?>[] { Stream.class, Predicate.class }))
 					|| Boolean.logicalAnd(Objects.equals(name, "encodeToString"),
-							Arrays.equals(parameterTypes, new Class<?>[] { Encoder.class, byte[].class }))) {
+							Arrays.equals(parameterTypes, new Class<?>[] { Encoder.class, byte[].class }))
+					|| Boolean.logicalAnd(Objects.equals(name, "getSimpleName"),
+							Arrays.equals(parameterTypes, new Class<?>[] { Class.class }))) {
 				//
 				Assert.assertNotNull(result, toString);
 				//
@@ -404,24 +432,6 @@ class Win32DpApiUtilTest {
 		if (instance != null) {
 			instance.clear();
 		}
-	}
-
-	@Test
-	void testDecode() throws IllegalAccessException, InvocationTargetException {
-		//
-		final Decoder decoder = Base64.getDecoder();
-		//
-		Assert.assertNull(invoke(METHOD_DECODE, null, decoder, null));
-		//
-		Assert.assertEquals(invoke(METHOD_DECODE, null, decoder, ""), new byte[] {});
-		//
-	}
-
-	@Test
-	void testEncodeToString() throws IllegalAccessException, InvocationTargetException {
-		//
-		Assert.assertNull(invoke(METHOD_ENCODE_TO_STRING, null, Base64.getEncoder(), null));
-		//
 	}
 
 	@Test
@@ -509,21 +519,23 @@ class Win32DpApiUtilTest {
 	@Test
 	void testCryptProtectData() throws Throwable {
 		//
-		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, Collections.singletonMap("file", null)));
+		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, Collections.singletonMap("file", null), null));
 		//
-		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, Collections.singletonMap("file", "")));
+		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, Collections.singletonMap("file", ""), null));
 		//
-		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, Collections.singletonMap("file", "pom.xml")));
+		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, Collections.singletonMap("file", "pom.xml"), null));
 		//
 		final Map<String, String> map = new LinkedHashMap<>(Collections.singletonMap("input", ""));
 		//
 		put(map, "encoding", "hex");
 		//
-		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, map));
+		final Map<String, Class<?>> classMap = Collections.singletonMap("hex", Hex.class);
+		//
+		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, map, classMap));
 		//
 		put(map, "flags", "0");
 		//
-		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, map));
+		Assert.assertNull(invoke(METHOD_CRYPT_PROTECT_DATA, null, map, classMap));
 		//
 	}
 
@@ -538,15 +550,15 @@ class Win32DpApiUtilTest {
 	@Test
 	void testCryptUnprotectData() throws Throwable {
 		//
-		Assert.assertNull(invoke(METHOD_CRYPT_UNPROTECT_DATA, null, Collections.singletonMap("file", null)));
+		Assert.assertNull(invoke(METHOD_CRYPT_UNPROTECT_DATA, null, Collections.singletonMap("file", null), null));
 		//
-		Assert.assertNull(invoke(METHOD_CRYPT_UNPROTECT_DATA, null, Collections.singletonMap("file", "")));
+		Assert.assertNull(invoke(METHOD_CRYPT_UNPROTECT_DATA, null, Collections.singletonMap("file", ""), null));
 		//
 		final Map<String, String> map = new LinkedHashMap<>(Collections.singletonMap("input", ""));
 		//
 		put(map, "encoding", "hex");
 		//
-		Assert.assertNull(invoke(METHOD_CRYPT_UNPROTECT_DATA, null, map));
+		Assert.assertNull(invoke(METHOD_CRYPT_UNPROTECT_DATA, null, map, Collections.singletonMap("hex", Hex.class)));
 		//
 	}
 
@@ -561,6 +573,82 @@ class Win32DpApiUtilTest {
 			//
 		Assert.assertNull(
 				invoke(METHOD_TEST_AND_ACCEPT, null, Reflection.newProxy(BiPredicate.class, ih), null, null, null));
+		//
+	}
+
+	@Test
+	void testLoad() throws Throwable {
+		//
+		final ClassPath cp = ClassPath.from(getContextClassLoader(Thread.currentThread()));
+		//
+		Assert.assertNotNull(invoke(METHOD_LOAD, null, (Object) testAndApply(CollectionUtils::isNotEmpty,
+				cp != null ? cp.getAllClasses() : null, x -> IterableUtils.get(x, 0), null)));
+		//
+	}
+
+	private static <T, R, E extends Throwable> R testAndApply(final Predicate<T> predicate, final T value,
+			final FailableFunction<T, R, E> functionTrue, final FailableFunction<T, R, E> functionFalse)
+			throws Throwable {
+		try {
+			return (R) invoke(METHOD_TEST_AND_APPLY, null, predicate, value, functionTrue, functionFalse);
+		} catch (final InvocationTargetException e) {
+			throw e.getTargetException();
+		}
+	}
+
+	private static ClassLoader getContextClassLoader(final Thread instance) throws Throwable {
+		try {
+			final Object obj = invoke(METHOD_GET_CONTEXT_CLASS_LOADER, null, instance);
+			if (obj == null) {
+				return null;
+			} else if (obj instanceof ClassLoader) {
+				return (ClassLoader) obj;
+			}
+			throw new Throwable(Objects.toString(getClass(obj)));
+		} catch (final InvocationTargetException e) {
+			throw e.getTargetException();
+		}
+	}
+
+	@Test
+	void testGetTopLevelClasses() throws Throwable {
+		//
+		final ClassPath cp = ClassPath.from(getContextClassLoader(Thread.currentThread()));
+		//
+		Assert.assertNull(invoke(METHOD_GET_TOP_LEVEL_CLASSES, null, cp, null));
+		//
+		Assert.assertNotNull(invoke(METHOD_GET_TOP_LEVEL_CLASSES, null, cp, ""));
+		//
+		Assert.assertNull(invoke(METHOD_GET_TOP_LEVEL_CLASSES, null, cp, Narcissus.allocateInstance(String.class)));
+		//
+	}
+
+	@Test
+	void testToLowerCase() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertEquals(invoke(METHOD_TO_LOWER_CASE, null, "A"), "a");
+		//
+	}
+
+	@Test
+	void testMatches() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertEquals(invoke(METHOD_MATCHES, null, "A", "A"), Boolean.TRUE);
+		//
+		Assert.assertEquals(invoke(METHOD_MATCHES, null, "A", "B"), Boolean.FALSE);
+		//
+		Assert.assertEquals(invoke(METHOD_MATCHES, null, "A", Narcissus.allocateInstance(String.class)), Boolean.FALSE);
+		//
+	}
+
+	@Test
+	void testFind() throws IllegalAccessException, InvocationTargetException {
+		//
+		final Pattern pattern = Pattern.compile("\\d+");
+		//
+		Assert.assertEquals(invoke(METHOD_FIND, null, invoke(METHOD_MATCHER, null, pattern, "")), Boolean.FALSE);
+		//
+		Assert.assertEquals(invoke(METHOD_FIND, null, invoke(METHOD_MATCHER, null, pattern, "1")), Boolean.TRUE);
 		//
 	}
 
