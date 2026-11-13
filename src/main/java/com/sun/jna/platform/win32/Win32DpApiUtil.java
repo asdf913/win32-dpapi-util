@@ -100,8 +100,17 @@ public class Win32DpApiUtil extends JPanel {
 
 	private static int DEFAULT_CRYPT_UNPROTECT_DATA_FLAGS;
 
-	private JTextComponent jtcCryptProtectInput, jtcCryptUnprotectInput, jtcCryptProtectFlags, jtcCryptUnprotectFlags,
-			jtcCryptProtectEntropy, jtcCryptUnprotectEntropy, jtcCryptProtectDescription = null;
+	@Target(ElementType.FIELD)
+	@Retention(RetentionPolicy.RUNTIME)
+	private @interface Note {
+		String value();
+	}
+
+	@Note("Input")
+	private JTextComponent jtcCryptProtectInput = null;
+
+	private JTextComponent jtcCryptUnprotectInput, jtcCryptProtectFlags, jtcCryptUnprotectFlags, jtcCryptProtectEntropy,
+			jtcCryptUnprotectEntropy, jtcCryptProtectDescription = null;
 
 	static {
 		//
