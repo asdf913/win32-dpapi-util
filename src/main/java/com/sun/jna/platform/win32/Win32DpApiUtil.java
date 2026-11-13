@@ -1,5 +1,6 @@
 package com.sun.jna.platform.win32;
 
+import java.awt.Component;
 import java.awt.GraphicsEnvironment;
 import java.io.File;
 import java.io.IOException;
@@ -299,14 +300,10 @@ public class Win32DpApiUtil extends JPanel {
 				//
 				jFrame.pack();
 				//
-				if (!isTestMode()) {
-					//
-					jFrame.setVisible(true);
-					//
-				} // if
-					//
 			} // if
 				//
+			testAndRun(!isTestMode(), () -> setVisible(jFrame, true));
+			//
 			return;
 			//
 		} // if
@@ -362,6 +359,18 @@ public class Win32DpApiUtil extends JPanel {
 			//
 		} // if
 			//
+	}
+
+	private static void setVisible(final Component instnace, final boolean visible) {
+		if (instnace != null) {
+			instnace.setVisible(visible);
+		}
+	}
+
+	private static void testAndRun(final boolean condition, final Runnable runnable) {
+		if (condition && runnable != null) {
+			runnable.run();
+		}
 	}
 
 	private static <T> T testAndGet(final boolean condition, final Supplier<T> supplier) {

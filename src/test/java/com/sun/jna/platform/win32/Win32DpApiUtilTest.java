@@ -1,5 +1,6 @@
 package com.sun.jna.platform.win32;
 
+import java.awt.Component;
 import java.io.File;
 import java.io.IOException;
 import java.lang.management.RuntimeMXBean;
@@ -31,6 +32,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collector;
 import java.util.stream.Stream;
 
+import javax.swing.JLabel;
+
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -59,7 +62,7 @@ class Win32DpApiUtilTest {
 			METHOD_GET_PARENT_FILE, METHOD_CRYPT_PROTECT_DATA, METHOD_CRYPT_UNPROTECT_DATA, METHOD_TEST_AND_ACCEPT,
 			METHOD_PUT, METHOD_LOAD, METHOD_GET_CONTEXT_CLASS_LOADER, METHOD_TEST_AND_APPLY,
 			METHOD_GET_TOP_LEVEL_CLASSES, METHOD_MATCHER, METHOD_TO_LOWER_CASE, METHOD_MATCHES, METHOD_FIND,
-			METHOD_IS_ABSTRACT, METHOD_IS_ASSIGNABLE_FROM, METHOD_TEST_AND_GET = null;
+			METHOD_IS_ABSTRACT, METHOD_IS_ASSIGNABLE_FROM, METHOD_TEST_AND_GET, METHOD_TEST_AND_RUN = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -122,6 +125,8 @@ class Win32DpApiUtilTest {
 				.setAccessible(true);
 		//
 		(METHOD_TEST_AND_GET = clz.getDeclaredMethod("testAndGet", Boolean.TYPE, Supplier.class)).setAccessible(true);
+		//
+		(METHOD_TEST_AND_RUN = clz.getDeclaredMethod("testAndRun", Boolean.TYPE, Runnable.class)).setAccessible(true);
 		//
 	}
 
@@ -387,6 +392,10 @@ class Win32DpApiUtilTest {
 				} else if (Objects.equals(parameterType, Executable.class)) {
 					//
 					add(collection, Narcissus.allocateInstance(Method.class));
+					//
+				} else if (Objects.equals(parameterType, Component.class)) {
+					//
+					add(collection, Narcissus.allocateInstance(JLabel.class));
 					//
 				} else if (parameterType != null && parameterType.isInterface()) {
 					//
@@ -742,6 +751,16 @@ class Win32DpApiUtilTest {
 	void testTestAndGet() throws IllegalAccessException, InvocationTargetException {
 		//
 		Assert.assertNull(invoke(METHOD_TEST_AND_GET, null, Boolean.TRUE, null));
+		//
+	}
+
+	@Test
+	void testTestAndRun() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertNull(invoke(METHOD_TEST_AND_RUN, null, Boolean.TRUE, null));
+		//
+		Assert.assertNull(invoke(METHOD_TEST_AND_RUN, null, Boolean.TRUE,
+				Reflection.newProxy(Runnable.class, ObjectUtils.getIfNull(ih, IH::new))));
 		//
 	}
 
