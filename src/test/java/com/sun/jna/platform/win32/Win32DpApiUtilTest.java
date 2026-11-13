@@ -24,6 +24,7 @@ import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -58,7 +59,7 @@ class Win32DpApiUtilTest {
 			METHOD_GET_PARENT_FILE, METHOD_CRYPT_PROTECT_DATA, METHOD_CRYPT_UNPROTECT_DATA, METHOD_TEST_AND_ACCEPT,
 			METHOD_PUT, METHOD_LOAD, METHOD_GET_CONTEXT_CLASS_LOADER, METHOD_TEST_AND_APPLY,
 			METHOD_GET_TOP_LEVEL_CLASSES, METHOD_MATCHER, METHOD_TO_LOWER_CASE, METHOD_MATCHES, METHOD_FIND,
-			METHOD_IS_ABSTRACT, METHOD_IS_ASSIGNABLE_FROM = null;
+			METHOD_IS_ABSTRACT, METHOD_IS_ASSIGNABLE_FROM, METHOD_TEST_AND_GET = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -119,6 +120,8 @@ class Win32DpApiUtilTest {
 		//
 		(METHOD_IS_ASSIGNABLE_FROM = clz.getDeclaredMethod("isAssignableFrom", Class.class, Class.class))
 				.setAccessible(true);
+		//
+		(METHOD_TEST_AND_GET = clz.getDeclaredMethod("testAndGet", Boolean.TYPE, Supplier.class)).setAccessible(true);
 		//
 	}
 
@@ -253,6 +256,8 @@ class Win32DpApiUtilTest {
 		//
 		Class<?>[] parameterTypes = null;
 		//
+		Class<?> parameterType = null;
+		//
 		Collection<Object> collection = null;
 		//
 		for (int i = 0; ms != null && i < ms.length; i++) {
@@ -268,9 +273,13 @@ class Win32DpApiUtilTest {
 			//
 			for (int j = 0; j < parameterTypes.length; j++) {
 				//
-				if (Objects.equals(ArrayUtils.get(parameterTypes, j), Character.TYPE)) {
+				if (Objects.equals(parameterType = ArrayUtils.get(parameterTypes, j), Character.TYPE)) {
 					//
 					add(collection, Character.valueOf(' '));
+					//
+				} else if (Objects.equals(parameterType, Boolean.TYPE)) {
+					//
+					add(collection, Boolean.FALSE);
 					//
 				} else {
 					//
@@ -366,6 +375,10 @@ class Win32DpApiUtilTest {
 				} else if (Objects.equals(parameterType, Character.TYPE)) {
 					//
 					add(collection, Character.valueOf(' '));
+					//
+				} else if (Objects.equals(parameterType, Boolean.TYPE)) {
+					//
+					add(collection, Boolean.FALSE);
 					//
 				} else if (Objects.equals(parameterType, ClassLoader.class)) {
 					//
@@ -722,6 +735,13 @@ class Win32DpApiUtilTest {
 		Assert.assertEquals(invoke(METHOD_IS_ASSIGNABLE_FROM, null, Object.class, Object.class), Boolean.TRUE);
 		//
 		Assert.assertEquals(invoke(METHOD_IS_ASSIGNABLE_FROM, null, String.class, Object.class), Boolean.FALSE);
+		//
+	}
+
+	@Test
+	void testTestAndGet() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertNull(invoke(METHOD_TEST_AND_GET, null, Boolean.TRUE, null));
 		//
 	}
 

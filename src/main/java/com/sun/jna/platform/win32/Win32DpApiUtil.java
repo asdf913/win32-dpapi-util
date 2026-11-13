@@ -28,6 +28,7 @@ import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.regex.MatchResult;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -288,7 +289,7 @@ public class Win32DpApiUtil extends JPanel {
 				//
 			} // if
 				//
-			final JFrame jFrame = !GraphicsEnvironment.isHeadless() ? new JFrame() : null;
+			final JFrame jFrame = testAndGet(!GraphicsEnvironment.isHeadless(), JFrame::new);
 			//
 			if (jFrame != null) {
 				//
@@ -361,6 +362,10 @@ public class Win32DpApiUtil extends JPanel {
 			//
 		} // if
 			//
+	}
+
+	private static <T> T testAndGet(final boolean condition, final Supplier<T> supplier) {
+		return condition && supplier != null ? supplier.get() : null;
 	}
 
 	private static boolean isAbstract(final Class<?> instance) {
