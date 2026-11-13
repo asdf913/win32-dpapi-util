@@ -323,8 +323,8 @@ public class Win32DpApiUtil extends JPanel {
 		final Map<String, Class<?>> classMap = collect(filter(
 				map(stream(getTopLevelClasses(from(getContextClassLoader(Thread.currentThread())),
 						"org.apache.commons.codec.binary")), Win32DpApiUtil::load),
-				x -> Boolean.logicalAnd(isAssignableFrom(BinaryEncoder.class, x),
-						isAssignableFrom(BinaryDecoder.class, x)) && !isAbstract(x)),
+				x -> Boolean.logicalAnd(Boolean.logicalAnd(isAssignableFrom(BinaryEncoder.class, x),
+						isAssignableFrom(BinaryDecoder.class, x)), !isAbstract(x))),
 				Collectors.toMap(x -> {
 					//
 					final String simpleName = getSimpleName(x);
