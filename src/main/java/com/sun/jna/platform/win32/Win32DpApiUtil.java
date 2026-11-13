@@ -132,9 +132,9 @@ public class Win32DpApiUtil extends JPanel {
 	private JTextComponent jtcCryptProtectDescription = null;
 
 	@Note("CryptProtect")
-	private ComboBoxModel<?> cbmCryptProtect = null;
+	private transient ComboBoxModel<?> cbmCryptProtect = null;
 
-	private ComboBoxModel<?> cbmCryptUnprotect = null;
+	private transient ComboBoxModel<?> cbmCryptUnprotect = null;
 
 	static {
 		//
