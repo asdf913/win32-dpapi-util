@@ -74,7 +74,8 @@ class Win32DpApiUtilTest {
 			METHOD_PUT, METHOD_LOAD, METHOD_GET_CONTEXT_CLASS_LOADER, METHOD_TEST_AND_APPLY,
 			METHOD_GET_TOP_LEVEL_CLASSES, METHOD_MATCHER, METHOD_TO_LOWER_CASE, METHOD_MATCHES, METHOD_FIND,
 			METHOD_IS_ABSTRACT, METHOD_IS_ASSIGNABLE_FROM, METHOD_TEST_AND_GET, METHOD_TEST_AND_RUN, METHOD_CAST,
-			METHOD_IS_STATIC, METHOD_GET_TEXT, METHOD_SET_TEXT, METHOD_AND, METHOD_SHOW_OPEN_DIALOG = null;
+			METHOD_IS_STATIC, METHOD_GET_TEXT, METHOD_SET_TEXT, METHOD_AND, METHOD_SHOW_OPEN_DIALOG,
+			METHOD_GET_NAME_CLASS = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -154,11 +155,13 @@ class Win32DpApiUtilTest {
 		(METHOD_SHOW_OPEN_DIALOG = clz.getDeclaredMethod("showOpenDialog", JFileChooser.class, Integer.TYPE))
 				.setAccessible(true);
 		//
+		(METHOD_GET_NAME_CLASS = clz.getDeclaredMethod("getName", Class.class)).setAccessible(true);
+		//
 	}
 
 	private static class IH implements InvocationHandler {
 
-		private Boolean test, containsKey, getAsBoolean = null;
+		private Boolean test, containsKey, getAsBoolean, value = null;
 
 		private Integer modifiers = null;
 
@@ -248,10 +251,21 @@ class Win32DpApiUtilTest {
 				//
 				return null;
 				//
+			} else if (Objects.equals(getName(getDeclaringClass(method)),
+					"com.sun.jna.platform.win32.Win32DpApiUtil$Editable") && Objects.equals(name, "value")) {
+				//
+				return value;
+				//
 			} // if
 				//
+			;
+			//
 			throw new Throwable(name);
 			//
+		}
+
+		private static Class<?> getDeclaringClass(final Member instance) {
+			return instance != null ? instance.getDeclaringClass() : null;
 		}
 
 	}
@@ -267,6 +281,20 @@ class Win32DpApiUtilTest {
 		//
 		ih = new IH();
 		//
+	}
+
+	private static String getName(final Class<?> instance) throws Throwable {
+		try {
+			final Object obj = invoke(METHOD_GET_NAME_CLASS, null, instance);
+			if (obj == null) {
+				return null;
+			} else if (obj instanceof String) {
+				return (String) obj;
+			}
+			throw new Throwable(Objects.toString(getClass(obj)));
+		} catch (final InvocationTargetException e) {
+			throw e.getTargetException();
+		}
 	}
 
 	private static <T> T cast(final Class<T> clz, final Object instance) throws Throwable {
@@ -568,7 +596,10 @@ class Win32DpApiUtilTest {
 						|| Boolean.logicalAnd(Objects.equals(name, "getSimpleName"),
 								Arrays.equals(parameterTypes, new Class<?>[] { Class.class }))
 						|| Boolean.logicalAnd(Objects.equals(name, "getWidth"),
-								Arrays.equals(parameterTypes, new Class<?>[] { Dimension2D.class }))) {
+								Arrays.equals(parameterTypes, new Class<?>[] { Dimension2D.class }))
+						|| Boolean.logicalAnd(Objects.equals(name, "value"),
+								Arrays.equals(parameterTypes, new Class<?>[] {
+										Class.forName("com.sun.jna.platform.win32.Win32DpApiUtil$Editable") }))) {
 					//
 					Assert.assertNotNull(result, toString);
 					//

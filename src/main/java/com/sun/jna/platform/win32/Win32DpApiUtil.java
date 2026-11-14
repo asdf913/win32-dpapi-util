@@ -136,13 +136,25 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 	@Note("Entropy")
 	private JTextComponent jtcCryptUnprotectEntropy = null;
 
-	private JTextComponent jtcCryptProtectDescription, jtcCryptProtectOutputFile, jtcCryptUnprotectOutputFile = null;
+	private JTextComponent jtcCryptProtectDescription = null;
 
-	@Note("Output")
+	@Target(ElementType.FIELD)
+	@Retention(RetentionPolicy.RUNTIME)
+	private @interface Editable {
+		boolean value();
+	}
+
+	@Editable(false)
 	private JTextComponent jtcCryptProtectOutput = null;
 
-	@Note("Output")
+	@Editable(false)
 	private JTextComponent jtcCryptUnprotectOutput = null;
+
+	@Editable(false)
+	private JTextComponent jtcCryptProtectOutputFile = null;
+
+	@Editable(false)
+	private JTextComponent jtcCryptUnprotectOutputFile = null;
 
 	@Note("CryptProtect")
 	private transient ComboBoxModel<?> cbmCryptProtect = null;
@@ -472,6 +484,28 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 							addActionListener(x, instance);
 						});
 				//
+				forEach(map(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> x != null && isAssignableFrom(JTextComponent.class, x.getType())
+								&& x.isAnnotationPresent(Editable.class)),
+						x -> Pair.of(x != null && x.isAnnotationPresent(Editable.class)
+								? value(x.getAnnotation(Editable.class))
+								: null, cast(JTextComponent.class, Narcissus.getField(instance, x)))),
+						x -> {
+							//
+							final Boolean b = getKey(x);
+							//
+							final JTextComponent jtc = getValue(x);
+							//
+							if (b != null && jtc != null) {
+								//
+								jtc.setEditable(b.booleanValue());
+								//
+							} // if
+								//
+						});
+				;
+				//
 			} else {
 				//
 				instance.add(new JLabel(message));
@@ -522,6 +556,10 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 		} // if
 			//
+	}
+
+	private static Boolean value(final Editable instance) {
+		return instance != null ? Boolean.valueOf(instance.value()) : null;
 	}
 
 	private static void addActionListener(final AbstractButton instance, final ActionListener actionListener) {
