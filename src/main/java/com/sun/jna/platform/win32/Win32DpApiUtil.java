@@ -8,12 +8,14 @@ import java.awt.geom.Dimension2D;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.lang.annotation.Annotation;
 import java.lang.annotation.ElementType;
 import java.lang.annotation.Retention;
 import java.lang.annotation.RetentionPolicy;
 import java.lang.annotation.Target;
 import java.lang.management.ManagementFactory;
 import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
@@ -486,11 +488,11 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				forEach(map(filter(
 						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
-						x -> x != null && isAssignableFrom(JTextComponent.class, getType(x))
-								&& x.isAnnotationPresent(Editable.class)),
-						x -> Pair.of(x != null && x.isAnnotationPresent(Editable.class)
-								? value(x.getAnnotation(Editable.class))
-								: null, cast(JTextComponent.class, Narcissus.getField(instance, x)))),
+						x -> isAssignableFrom(JTextComponent.class, getType(x))
+								&& isAnnotationPresent(x, Editable.class)),
+						x -> Pair.of(
+								isAnnotationPresent(x, Editable.class) ? value(getAnnotation(x, Editable.class)) : null,
+								cast(JTextComponent.class, Narcissus.getField(instance, x)))),
 						x -> {
 							//
 							final Boolean b = getKey(x);
@@ -553,6 +555,16 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 		} // if
 			//
+	}
+
+	private static <T extends Annotation> T getAnnotation(final AnnotatedElement instance,
+			final Class<T> annotationClass) {
+		return instance != null ? instance.getAnnotation(annotationClass) : null;
+	}
+
+	private static boolean isAnnotationPresent(final AnnotatedElement instance,
+			final Class<? extends Annotation> annotationClass) {
+		return instance != null && instance.isAnnotationPresent(annotationClass);
 	}
 
 	private static Class<?> getType(final Field instance) {

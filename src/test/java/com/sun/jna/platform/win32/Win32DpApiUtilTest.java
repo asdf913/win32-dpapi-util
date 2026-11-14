@@ -6,7 +6,9 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.Dimension2D;
 import java.io.File;
 import java.io.IOException;
+import java.lang.annotation.Annotation;
 import java.lang.management.RuntimeMXBean;
+import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
@@ -163,7 +165,7 @@ class Win32DpApiUtilTest {
 
 	private static class IH implements InvocationHandler {
 
-		private Boolean test, containsKey, getAsBoolean, value = null;
+		private Boolean test, containsKey, getAsBoolean, value, isAnnotationPresent = null;
 
 		private Integer modifiers = null;
 
@@ -258,10 +260,20 @@ class Win32DpApiUtilTest {
 				//
 				return value;
 				//
+			} else if (proxy instanceof AnnotatedElement) {
+				//
+				if (Objects.equals(name, "isAnnotationPresent")) {
+					//
+					return isAnnotationPresent;
+					//
+				} else if (Objects.equals(name, "getAnnotation")) {
+					//
+					return null;
+					//
+				} // if
+					//
 			} // if
 				//
-			;
-			//
 			throw new Throwable(name);
 			//
 		}
