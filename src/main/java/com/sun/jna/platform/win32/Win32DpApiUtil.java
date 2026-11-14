@@ -1343,15 +1343,9 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			final JFileChooser jfc = new JFileChooser(".");
 			//
-			File file = null;
+			final File file = testAndGet(and(!GraphicsEnvironment.isHeadless(), !isTestMode(),
+					() -> showOpenDialog(jfc, JFileChooser.APPROVE_OPTION)), () -> getSelectedFile(jfc));
 			//
-			if (and(!GraphicsEnvironment.isHeadless(), !isTestMode(),
-					() -> jfc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)) {
-				//
-				file = jfc.getSelectedFile();
-				//
-			} // if
-				//
 			final File fileOutput = new File(getParentFile(file), String.join(".", getName(file), CRYPT_PROTECT_DATA));
 			//
 			try {
@@ -1405,15 +1399,9 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			final JFileChooser jfc = new JFileChooser(".");
 			//
-			File file = null;
+			final File file = testAndGet(and(!GraphicsEnvironment.isHeadless(), !isTestMode(),
+					() -> showOpenDialog(jfc, JFileChooser.APPROVE_OPTION)), () -> getSelectedFile(jfc));
 			//
-			if (and(!GraphicsEnvironment.isHeadless(), !isTestMode(),
-					() -> jfc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)) {
-				//
-				file = jfc.getSelectedFile();
-				//
-			} // if
-				//
 			File fileOutput = null;
 			//
 			final String name = getName(file);
@@ -1457,6 +1445,29 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 		} // if
 			//
+	}
+
+	private static boolean showOpenDialog(final JFileChooser instance, final int integer) {
+		//
+		if (instance == null) {
+			//
+			return false;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), "ui")), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		return (field == null || Narcissus.getField(instance, field) != null) && !GraphicsEnvironment.isHeadless()
+				&& !isTestMode() && instance.showOpenDialog(null) == integer;
+		//
+	}
+
+	private static File getSelectedFile(final JFileChooser instance) {
+		return instance != null ? instance.getSelectedFile() : null;
 	}
 
 	private static boolean and(final boolean a, final boolean b, final BooleanSupplier booleanSupplier) {

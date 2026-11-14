@@ -39,6 +39,7 @@ import java.util.stream.Stream;
 import javax.swing.AbstractButton;
 import javax.swing.ComboBoxModel;
 import javax.swing.JButton;
+import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
@@ -72,7 +73,7 @@ class Win32DpApiUtilTest {
 			METHOD_PUT, METHOD_LOAD, METHOD_GET_CONTEXT_CLASS_LOADER, METHOD_TEST_AND_APPLY,
 			METHOD_GET_TOP_LEVEL_CLASSES, METHOD_MATCHER, METHOD_TO_LOWER_CASE, METHOD_MATCHES, METHOD_FIND,
 			METHOD_IS_ABSTRACT, METHOD_IS_ASSIGNABLE_FROM, METHOD_TEST_AND_GET, METHOD_TEST_AND_RUN, METHOD_CAST,
-			METHOD_IS_STATIC, METHOD_GET_TEXT, METHOD_SET_TEXT, METHOD_AND = null;
+			METHOD_IS_STATIC, METHOD_GET_TEXT, METHOD_SET_TEXT, METHOD_AND, METHOD_SHOW_OPEN_DIALOG = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -147,6 +148,9 @@ class Win32DpApiUtilTest {
 		(METHOD_SET_TEXT = clz.getDeclaredMethod("setText", JTextComponent.class, String.class)).setAccessible(true);
 		//
 		(METHOD_AND = clz.getDeclaredMethod("and", Boolean.TYPE, Boolean.TYPE, BooleanSupplier.class))
+				.setAccessible(true);
+		//
+		(METHOD_SHOW_OPEN_DIALOG = clz.getDeclaredMethod("showOpenDialog", JFileChooser.class, Integer.TYPE))
 				.setAccessible(true);
 		//
 	}
@@ -327,6 +331,10 @@ class Win32DpApiUtilTest {
 					//
 					add(collection, Boolean.FALSE);
 					//
+				} else if (Objects.equals(parameterType, Integer.TYPE)) {
+					//
+					add(collection, Integer.valueOf(0));
+					//
 				} else {
 					//
 					add(collection, null);
@@ -451,6 +459,10 @@ class Win32DpApiUtilTest {
 				} else if (Objects.equals(parameterType, Boolean.TYPE)) {
 					//
 					add(collection, Boolean.FALSE);
+					//
+				} else if (Objects.equals(parameterType, Integer.TYPE)) {
+					//
+					add(collection, Integer.valueOf(0));
 					//
 				} else if (Objects.equals(parameterType, ClassLoader.class)) {
 					//
@@ -894,6 +906,14 @@ class Win32DpApiUtilTest {
 		} // if
 			//
 		Assert.assertEquals(invoke(METHOD_AND, null, Boolean.TRUE, Boolean.TRUE, booleanSupplier), Boolean.TRUE);
+		//
+	}
+
+	@Test
+	void testShowOpenDialog() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertEquals(invoke(METHOD_SHOW_OPEN_DIALOG, null, new JFileChooser(), JFileChooser.APPROVE_OPTION),
+				Boolean.FALSE);
 		//
 	}
 
