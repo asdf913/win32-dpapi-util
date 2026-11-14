@@ -140,7 +140,10 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 
 	private transient ComboBoxModel<?> cbmCryptUnprotect = null;
 
-	private AbstractButton btnCryptProtect, btnCryptUnprotect = null;
+	@Note("CryptProtect")
+	private AbstractButton btnCryptProtect = null;
+
+	private AbstractButton btnCryptUnprotect = null;
 
 	static {
 		//
@@ -1224,7 +1227,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 	@Override
 	public void actionPerformed(final ActionEvent evt) {
 		//
-		final Object source = getSource(evt) ;
+		final Object source = getSource(evt);
 		//
 		if (Objects.equals(source, btnCryptProtect)) {
 			//
