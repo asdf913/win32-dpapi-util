@@ -392,34 +392,35 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				final String growx = "growx";
 				//
-				final String layout = String.format("%1$s,span %2$s,%3$s", growx, span, wrap);
+				final String layout1 = String.format("%1$s,span %2$s,%3$s", growx, span, wrap);
 				//
-				jPanel1.add(instance.jtcCryptProtectInput = new JTextField(), layout);
+				jPanel1.add(instance.jtcCryptProtectInput = new JTextField(), layout1);
 				//
 				jPanel1.add(new JLabel("Flags"));
 				//
-				jPanel1.add(instance.jtcCryptProtectFlags = new JTextField(), layout);
+				jPanel1.add(instance.jtcCryptProtectFlags = new JTextField(), layout1);
 				//
 				jPanel1.add(new JLabel("Entropy"));
 				//
-				jPanel1.add(instance.jtcCryptProtectEntropy = new JTextField(), layout);
+				jPanel1.add(instance.jtcCryptProtectEntropy = new JTextField(), layout1);
 				//
 				final JLabel jLabel = new JLabel("Description");
 				//
 				jPanel1.add(jLabel);
 				//
-				jPanel1.add(instance.jtcCryptProtectDescription = new JTextField(), layout);
+				jPanel1.add(instance.jtcCryptProtectDescription = new JTextField(), layout1);
 				//
 				jPanel1.add(new JLabel());
 				//
 				jPanel1.add(instance.btnCryptProtect = new JButton(input), growx);
 				//
-				jPanel1.add(instance.btnCryptProtectFile = new JButton("File"),
-						String.format("%1$s,%2$s", growx, wrap));
+				final String layout2 = String.format("%1$s,%2$s", growx, wrap);
+				//
+				jPanel1.add(instance.btnCryptProtectFile = new JButton("File"), layout2);
 				//
 				jPanel1.add(new JLabel("Ouptut"));
 				//
-				jPanel1.add(instance.jtcCryptProtectOutput = new JTextField(), layout);
+				jPanel1.add(instance.jtcCryptProtectOutput = new JTextField(), layout1);
 				//
 				jPanel1.add(new JLabel("Output File"));
 				//
@@ -439,28 +440,27 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel2.add(new JLabel(input), String.format("wmin %1$s", getWidth(jLabel.getPreferredSize())));
 				//
-				jPanel2.add(instance.jtcCryptUnprotectInput = new JTextField(), layout);
+				jPanel2.add(instance.jtcCryptUnprotectInput = new JTextField(), layout1);
 				//
 				jPanel2.add(new JLabel("Flags"));
 				//
-				jPanel2.add(instance.jtcCryptUnprotectFlags = new JTextField(), layout);
+				jPanel2.add(instance.jtcCryptUnprotectFlags = new JTextField(), layout1);
 				//
 				jPanel2.add(new JLabel("Entropy"));
 				//
-				jPanel2.add(instance.jtcCryptUnprotectEntropy = new JTextField(), layout);
+				jPanel2.add(instance.jtcCryptUnprotectEntropy = new JTextField(), layout1);
 				//
-				jPanel2.add(new JLabel(), String.format("%1$s,%2$s", growx, wrap));
+				jPanel2.add(new JLabel(), layout2);
 				//
 				jPanel2.add(new JLabel());
 				//
 				jPanel2.add(instance.btnCryptUnprotect = new JButton(input), growx);
 				//
-				jPanel2.add(instance.btnCryptUnprotectFile = new JButton("File"),
-						String.format("%1$s,%2$s", growx, wrap));
+				jPanel2.add(instance.btnCryptUnprotectFile = new JButton("File"), layout2);
 				//
 				jPanel2.add(new JLabel("Ouptut"));
 				//
-				jPanel2.add(instance.jtcCryptUnprotectOutput = new JTextField(), layout);
+				jPanel2.add(instance.jtcCryptUnprotectOutput = new JTextField(), layout1);
 				//
 				jPanel2.add(new JLabel("Output File"));
 				//
