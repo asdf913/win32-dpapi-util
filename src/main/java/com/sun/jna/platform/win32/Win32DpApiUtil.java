@@ -382,8 +382,6 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel1.add(instance.btnCryptProtect = new JButton("Execute"), String.format("%1$s,%2$s", growx, wrap));
 				//
-				instance.btnCryptProtect.addActionListener(instance);
-				//
 				jtp.add("CryptProtect", jPanel1);
 				//
 				final JPanel jPanel2 = new JPanel();
@@ -415,8 +413,6 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				jPanel2.add(instance.btnCryptUnprotect = new JButton("Execute"),
 						String.format("%1$s,%2$s", growx, wrap));
 				//
-				instance.btnCryptUnprotect.addActionListener(instance);
-				//
 				jtp.add("CryptUnprotect", jPanel2);
 				//
 				instance.add(jtp, String.format("wmin %1$s", 219));
@@ -426,9 +422,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 								testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
 								x -> isAssignableFrom(AbstractButton.class, x != null ? x.getType() : null)),
 						x -> cast(AbstractButton.class, Narcissus.getField(instance, x))), x -> {
-							if (x != null) {
-								x.addActionListener(instance);
-							}
+							addActionListener(x, instance);
 						});
 				//
 			} else {
@@ -478,6 +472,28 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 		} else {
 			//
 			throw new RuntimeException(action);
+			//
+		} // if
+			//
+	}
+
+	private static void addActionListener(final AbstractButton instance, final ActionListener actionListener) {
+		//
+		if (instance == null) {
+			//
+			return;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), "listenerList")), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		if (field == null || Narcissus.getField(instance, field) != null) {
+			//
+			instance.addActionListener(actionListener);
 			//
 		} // if
 			//

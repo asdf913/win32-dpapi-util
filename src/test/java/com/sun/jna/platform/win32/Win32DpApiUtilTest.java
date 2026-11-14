@@ -462,6 +462,10 @@ class Win32DpApiUtilTest {
 					//
 					add(collection, Narcissus.allocateInstance(Dimension.class));
 					//
+				} else if (Objects.equals(parameterType, AbstractButton.class)) {
+					//
+					add(collection, Narcissus.allocateInstance(JButton.class));
+					//
 				} else if (parameterType != null && parameterType.isInterface()) {
 					//
 					if ((ih = ObjectUtils.getIfNull(ih, IH::new)) != null) {
