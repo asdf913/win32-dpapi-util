@@ -1337,6 +1337,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // try
 				//
+			return;
+			//
 		} else if (Objects.equals(source, btnCryptProtectFile)) {
 			//
 			final JFileChooser jfc = new JFileChooser(".");
@@ -1363,6 +1365,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // try
 				//
+			return;
+			//
 		} else if (Objects.equals(source, btnCryptUnprotect)) {
 			//
 			final Map<String, Class<?>> encodingMap = getEncodingMap(getContextClassLoader(Thread.currentThread()));
@@ -1393,7 +1397,31 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // try
 				//
-		} else if (Objects.equals(source, btnCryptUnprotectFile)) {
+			return;
+			//
+		} // if
+			//
+		try {
+			//
+			actionPerformed(this, source);
+			//
+		} catch (final IOException | RuntimeException e) {
+			//
+			throw new RuntimeException(e);
+			//
+		} // try
+			//
+	}
+
+	private static void actionPerformed(final Win32DpApiUtil instance, final Object source) throws IOException {
+		//
+		if (instance == null) {
+			//
+			return;
+			//
+		} // if
+			//
+		if (Objects.equals(source, instance.btnCryptUnprotectFile)) {
 			//
 			final JFileChooser jfc = new JFileChooser(".");
 			//
@@ -1418,29 +1446,21 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // if
 				//
-			try {
+			final byte[] bs = cryptUnprotectData(
+					testAndApply(a -> and(a, Win32DpApiUtil::exists, Win32DpApiUtil::isFile), file,
+							FileUtils::readFileToByteArray, null),
+					getBytes(getText(instance.jtcCryptUnprotectEntropy)), testAndApply(NumberUtils::isDigits,
+							getText(instance.jtcCryptUnprotectFlags), Integer::valueOf, null));
+			//
+			if (!Arrays.equals(testAndApply(x -> and(x, Win32DpApiUtil::exists, Win32DpApiUtil::isFile), fileOutput,
+					FileUtils::readFileToByteArray, null), bs)) {
 				//
-				final byte[] bs = cryptUnprotectData(
-						testAndApply(a -> and(a, Win32DpApiUtil::exists, Win32DpApiUtil::isFile), file,
-								FileUtils::readFileToByteArray, null),
-						getBytes(getText(jtcCryptUnprotectEntropy)),
-						testAndApply(NumberUtils::isDigits, getText(jtcCryptUnprotectFlags), Integer::valueOf, null));
+				FileUtils.writeByteArrayToFile(fileOutput, bs);
 				//
-				if (!Arrays.equals(testAndApply(x -> and(x, Win32DpApiUtil::exists, Win32DpApiUtil::isFile), fileOutput,
-						FileUtils::readFileToByteArray, null), bs)) {
-					//
-					FileUtils.writeByteArrayToFile(fileOutput, bs);
-					//
-				} // if
-					//
-				setText(jtcCryptUnprotectOutput, getAbsolutePath(fileOutput));
+			} // if
 				//
-			} catch (final IOException e) {
-				//
-				throw new RuntimeException(e);
-				//
-			} // try
-				//
+			setText(instance.jtcCryptUnprotectOutput, getAbsolutePath(fileOutput));
+			//
 		} // if
 			//
 	}
