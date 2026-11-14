@@ -491,7 +491,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 						x -> Boolean.logicalAnd(isAssignableFrom(JTextComponent.class, getType(x)),
 								isAnnotationPresent(x, Editable.class))),
 						x -> Pair.of(
-								isAnnotationPresent(x, Editable.class) ? value(getAnnotation(x, Editable.class)) : null,
+								testAndApply(Win32DpApiUtil::isAnnotationPresent, x, Editable.class,
+										(a, b) -> value(getAnnotation(a, b)), null),
 								cast(JTextComponent.class, Narcissus.getField(instance, x)))),
 						x -> {
 							//
