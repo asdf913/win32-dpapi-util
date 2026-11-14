@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
@@ -420,6 +421,16 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				instance.add(jtp, String.format("wmin %1$s", 219));
 				//
+				forEach(map(
+						filter(stream(
+								testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+								x -> isAssignableFrom(AbstractButton.class, x != null ? x.getType() : null)),
+						x -> cast(AbstractButton.class, Narcissus.getField(instance, x))), x -> {
+							if (x != null) {
+								x.addActionListener(instance);
+							}
+						});
+				//
 			} else {
 				//
 				instance.add(new JLabel(message));
@@ -470,6 +481,12 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 		} // if
 			//
+	}
+
+	private static <T> void forEach(final Stream<T> instance, final Consumer<? super T> action) {
+		if (instance != null) {
+			instance.forEach(action);
+		}
 	}
 
 	private static int compare(final String a, final String b) {
