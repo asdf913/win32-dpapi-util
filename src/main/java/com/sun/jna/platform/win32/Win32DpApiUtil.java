@@ -844,7 +844,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			final Class<?> clz = get(classMap, encoding);
 			//
-			final BinaryEncoder binaryEncoder = cast(BinaryEncoder.class, clz != null ? clz.newInstance() : null);
+			final BinaryEncoder binaryEncoder = cast(BinaryEncoder.class, newInstance(clz));
 			//
 			info(LOG, testAndApply(Objects::nonNull,
 					binaryEncoder != null && bs != null ? binaryEncoder.encode(bs) : null, String::new, null));
@@ -916,10 +916,12 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			final Class<?> clz = get(classMap, encoding);
 			//
-			info(LOG, testAndApply(Objects::nonNull,
-					cryptUnprotectData(toByteArray(get(map, INPUT),
-							cast(BinaryDecoder.class, clz != null ? clz.newInstance() : null)), entropy, flags),
-					String::new, null));
+			info(LOG,
+					testAndApply(Objects::nonNull,
+							cryptUnprotectData(
+									toByteArray(get(map, INPUT), cast(BinaryDecoder.class, newInstance(clz))), entropy,
+									flags),
+							String::new, null));
 			//
 		} else if (containsKey(map, "file")) {
 			//
@@ -988,6 +990,10 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 		return flags != null ? Crypt32Util.cryptUnprotectData(data, flags.intValue())
 				: Crypt32Util.cryptUnprotectData(data);
 		//
+	}
+
+	private static Object newInstance(final Class<?> instance) throws InstantiationException, IllegalAccessException {
+		return instance != null && !Objects.equals(instance, Class.class) ? instance.newInstance() : null;
 	}
 
 	private static <T> T cast(final Class<T> clz, final Object instance) {
@@ -1254,7 +1260,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			try {
 				//
-				binaryEncoder = cast(BinaryEncoder.class, clz != null ? clz.newInstance() : null);
+				binaryEncoder = cast(BinaryEncoder.class, newInstance(clz));
 				//
 				info(LOG, testAndApply(Objects::nonNull,
 						binaryEncoder != null && bs != null ? binaryEncoder.encode(bs) : null, String::new, null));
@@ -1284,8 +1290,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			try {
 				//
 				info(LOG, testAndApply(Objects::nonNull, cryptUnprotectData(
-						toByteArray(getText(jtcCryptUnprotectInput),
-								cast(BinaryDecoder.class, clz != null ? clz.newInstance() : null)),
+						toByteArray(getText(jtcCryptUnprotectInput), cast(BinaryDecoder.class, newInstance(clz))),
 						getBytes(getText(jtcCryptUnprotectEntropy)),
 						testAndApply(NumberUtils::isDigits, getText(jtcCryptUnprotectFlags), Integer::valueOf, null)),
 						String::new, null));
