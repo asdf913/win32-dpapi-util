@@ -372,7 +372,9 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				jPanel1.add(new JComboBox<>(instance.cbmCryptProtect = new DefaultComboBoxModel<>(encodings)),
 						String.format("wmin %1$s,span %2$s,%3$s", 160, span, wrap));
 				//
-				jPanel1.add(new JLabel("Input"));
+				final String input = "Input";
+				//
+				jPanel1.add(new JLabel(input));
 				//
 				final String growx = "growx";
 				//
@@ -398,7 +400,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel1.add(new JLabel());
 				//
-				jPanel1.add(instance.btnCryptProtect = new JButton("Input"), growx);
+				jPanel1.add(instance.btnCryptProtect = new JButton(input), growx);
 				//
 				jPanel1.add(instance.btnCryptProtectFile = new JButton("File"),
 						String.format("%1$s,%2$s", growx, wrap));
@@ -419,7 +421,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				jPanel2.add(new JComboBox<>(instance.cbmCryptUnprotect = new DefaultComboBoxModel<>(encodings)),
 						String.format("wmin %1$s,span %2$s,%3$s", 160, span, wrap));
 				//
-				jPanel2.add(new JLabel("Input"), String.format("wmin %1$s", getWidth(jLabel.getPreferredSize())));
+				jPanel2.add(new JLabel(input), String.format("wmin %1$s", getWidth(jLabel.getPreferredSize())));
 				//
 				jPanel2.add(instance.jtcCryptUnprotectInput = new JTextField(),
 						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
@@ -438,7 +440,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel2.add(new JLabel());
 				//
-				jPanel2.add(instance.btnCryptUnprotect = new JButton("Input"), growx);
+				jPanel2.add(instance.btnCryptUnprotect = new JButton(input), growx);
 				//
 				jPanel2.add(instance.btnCryptUnprotectFile = new JButton("File"),
 						String.format("%1$s,%2$s", growx, wrap));
