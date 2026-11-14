@@ -48,6 +48,7 @@ import javax.swing.ComboBoxModel;
 import javax.swing.DefaultComboBoxModel;
 import javax.swing.JButton;
 import javax.swing.JComboBox;
+import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
 import javax.swing.JPanel;
@@ -150,7 +151,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 	@Note("CryptProtect")
 	private AbstractButton btnCryptProtect = null;
 
-	private AbstractButton btnCryptUnprotect = null;
+	private AbstractButton btnCryptProtectFile, btnCryptUnprotect, btnCryptUnprotectFile = null;
 
 	static {
 		//
@@ -355,42 +356,50 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				final String wrap = "wrap";
 				//
+				final int span = 2;
+				//
 				final String[] encodings = toArray(keySet(encodingMap), new String[] {});
 				//
 				Arrays.sort(encodings, Win32DpApiUtil::compare);
 				//
 				jPanel1.add(new JComboBox<>(instance.cbmCryptProtect = new DefaultComboBoxModel<>(encodings)),
-						String.format("wmin %1$s,%2$s", 160, wrap));
+						String.format("wmin %1$s,span %2$s,%3$s", 160, span, wrap));
 				//
 				jPanel1.add(new JLabel("Input"));
 				//
 				final String growx = "growx";
 				//
-				jPanel1.add(instance.jtcCryptProtectInput = new JTextField(), String.format("%1$s,%2$s", growx, wrap));
+				jPanel1.add(instance.jtcCryptProtectInput = new JTextField(),
+						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
 				//
 				jPanel1.add(new JLabel("Flags"));
 				//
-				jPanel1.add(instance.jtcCryptProtectFlags = new JTextField(), String.format("%1$s,%2$s", growx, wrap));
+				jPanel1.add(instance.jtcCryptProtectFlags = new JTextField(),
+						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
 				//
 				jPanel1.add(new JLabel("Entropy"));
 				//
 				jPanel1.add(instance.jtcCryptProtectEntropy = new JTextField(),
-						String.format("%1$s,%2$s", growx, wrap));
+						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
 				//
 				final JLabel jLabel = new JLabel("Description");
 				//
 				jPanel1.add(jLabel);
 				//
 				jPanel1.add(instance.jtcCryptProtectDescription = new JTextField(),
-						String.format("%1$s,%2$s", growx, wrap));
+						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
 				//
 				jPanel1.add(new JLabel());
 				//
-				jPanel1.add(instance.btnCryptProtect = new JButton("Execute"), String.format("%1$s,%2$s", growx, wrap));
+				jPanel1.add(instance.btnCryptProtect = new JButton("Input"), growx);
+				//
+				jPanel1.add(instance.btnCryptProtectFile = new JButton("File"),
+						String.format("%1$s,%2$s", growx, wrap));
 				//
 				jPanel1.add(new JLabel("Ouptut"));
 				//
-				jPanel1.add(instance.jtcCryptProtectOutput = new JTextField(), String.format("%1$s,%2$s", growx, wrap));
+				jPanel1.add(instance.jtcCryptProtectOutput = new JTextField(),
+						String.format("%1$s,span %2$s", growx, span));
 				//
 				jtp.add("CryptProtect", jPanel1);
 				//
@@ -401,34 +410,36 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				jPanel2.add(new JLabel("Encoding"));
 				//
 				jPanel2.add(new JComboBox<>(instance.cbmCryptUnprotect = new DefaultComboBoxModel<>(encodings)),
-						String.format("wmin %1$s,%2$s", 160, wrap));
+						String.format("wmin %1$s,span %2$s,%3$s", 160, span, wrap));
 				//
 				jPanel2.add(new JLabel("Input"), String.format("wmin %1$s", getWidth(jLabel.getPreferredSize())));
 				//
 				jPanel2.add(instance.jtcCryptUnprotectInput = new JTextField(),
-						String.format("wmin %1$s,%2$s", 160, wrap));
+						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
 				//
 				jPanel2.add(new JLabel("Flags"));
 				//
 				jPanel2.add(instance.jtcCryptUnprotectFlags = new JTextField(),
-						String.format("%1$s,%2$s", growx, wrap));
+						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
 				//
 				jPanel2.add(new JLabel("Entropy"));
 				//
 				jPanel2.add(instance.jtcCryptUnprotectEntropy = new JTextField(),
-						String.format("%1$s,%2$s", growx, wrap));
+						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
 				//
 				jPanel2.add(new JLabel(), String.format("%1$s,%2$s", growx, wrap));
 				//
 				jPanel2.add(new JLabel());
 				//
-				jPanel2.add(instance.btnCryptUnprotect = new JButton("Execute"),
+				jPanel2.add(instance.btnCryptUnprotect = new JButton("Input"), growx);
+				//
+				jPanel2.add(instance.btnCryptUnprotectFile = new JButton("File"),
 						String.format("%1$s,%2$s", growx, wrap));
 				//
 				jPanel2.add(new JLabel("Ouptut"));
 				//
 				jPanel2.add(instance.jtcCryptUnprotectOutput = new JTextField(),
-						String.format("%1$s,%2$s", growx, wrap));
+						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
 				//
 				jtp.add("CryptUnprotect", jPanel2);
 				//
@@ -1321,6 +1332,38 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // try
 				//
+		} else if (Objects.equals(source, btnCryptProtectFile)) {
+			//
+			final JFileChooser jfc = new JFileChooser(".");
+			//
+			File file = null;
+			//
+			if (!GraphicsEnvironment.isHeadless() && !isTestMode()
+					&& jfc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+				//
+				file = jfc.getSelectedFile();
+				//
+			} // if
+				//
+			final File fileOutput = new File(getParentFile(file), String.join(".", getName(file), CRYPT_PROTECT_DATA));
+			//
+			try {
+				//
+				testAndAccept((a, b) -> b != null, fileOutput, cryptProtectData(
+						testAndApply(a -> and(a, Win32DpApiUtil::exists, Win32DpApiUtil::isFile), file,
+								FileUtils::readFileToByteArray, null),
+						getBytes(getText(jtcCryptProtectEntropy)),
+						testAndApply(NumberUtils::isDigits, getText(jtcCryptProtectFlags), Integer::valueOf, null),
+						getText(jtcCryptProtectDescription)), FileUtils::writeByteArrayToFile);
+				//
+				setText(jtcCryptProtectOutput, getAbsolutePath(fileOutput));
+				//
+			} catch (final IOException e) {
+				//
+				throw new RuntimeException(e);
+				//
+			} // try
+				//
 		} else if (Objects.equals(source, btnCryptUnprotect)) {
 			//
 			final Map<String, Class<?>> encodingMap = getEncodingMap(getContextClassLoader(Thread.currentThread()));
@@ -1346,6 +1389,60 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 						String::new, null));
 				//
 			} catch (final InstantiationException | IllegalAccessException | DecoderException e) {
+				//
+				throw new RuntimeException(e);
+				//
+			} // try
+				//
+		} else if (Objects.equals(source, btnCryptUnprotectFile)) {
+			//
+			final JFileChooser jfc = new JFileChooser(".");
+			//
+			File file = null;
+			//
+			if (!GraphicsEnvironment.isHeadless() && !isTestMode()
+					&& jfc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+				//
+				file = jfc.getSelectedFile();
+				//
+			} // if
+				//
+			File fileOutput = null;
+			//
+			final String name = getName(file);
+			//
+			final File parentFile = getParentFile(file);
+			//
+			final String fileNameSuffix = ".cryptProtectData";
+			//
+			if (endsWith(name, fileNameSuffix)) {
+				//
+				fileOutput = new File(parentFile, StringUtils.substringBefore(name, fileNameSuffix));
+				//
+			} else {
+				//
+				fileOutput = new File(parentFile, name + ".cryptUnprotectData");
+				//
+			} // if
+				//
+			try {
+				//
+				final byte[] bs = cryptUnprotectData(
+						testAndApply(a -> and(a, Win32DpApiUtil::exists, Win32DpApiUtil::isFile), file,
+								FileUtils::readFileToByteArray, null),
+						getBytes(getText(jtcCryptUnprotectEntropy)),
+						testAndApply(NumberUtils::isDigits, getText(jtcCryptUnprotectFlags), Integer::valueOf, null));
+				//
+				if (!Arrays.equals(testAndApply(x -> and(x, Win32DpApiUtil::exists, Win32DpApiUtil::isFile), fileOutput,
+						FileUtils::readFileToByteArray, null), bs)) {
+					//
+					FileUtils.writeByteArrayToFile(fileOutput, bs);
+					//
+				} // if
+					//
+				setText(jtcCryptUnprotectOutput, getAbsolutePath(fileOutput));
+				//
+			} catch (final IOException e) {
 				//
 				throw new RuntimeException(e);
 				//

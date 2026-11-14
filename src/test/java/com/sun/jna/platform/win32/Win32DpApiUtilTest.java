@@ -873,12 +873,30 @@ class Win32DpApiUtilTest {
 			//
 		} // if
 			//
+			// btnCryptUnprotect
+			//
 		final AbstractButton btnCryptUnprotect = new JButton();
 		//
 		FieldUtils.writeDeclaredField(instance, "btnCryptUnprotect", btnCryptUnprotect, true);
 		//
 		Assert.assertThrows(Throwable.class,
 				() -> instance.actionPerformed(new ActionEvent(btnCryptUnprotect, 0, null)));
+		//
+		// btnCryptProtectFile
+		//
+		final AbstractButton btnCryptProtectFile = new JButton();
+		//
+		FieldUtils.writeDeclaredField(instance, "btnCryptProtectFile", btnCryptProtectFile, true);
+		//
+		instance.actionPerformed(new ActionEvent(btnCryptProtectFile, 0, null));
+		//
+		// btnCryptUnprotectFile
+		//
+		final AbstractButton btnCryptUnprotectFile = new JButton();
+		//
+		FieldUtils.writeDeclaredField(instance, "btnCryptUnprotectFile", btnCryptUnprotectFile, true);
+		//
+		instance.actionPerformed(new ActionEvent(btnCryptUnprotectFile, 0, null));
 		//
 	}
 
