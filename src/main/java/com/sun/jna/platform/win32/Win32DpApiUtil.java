@@ -495,11 +495,9 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 							//
 							final Boolean b = getKey(x);
 							//
-							final JTextComponent jtc = getValue(x);
-							//
-							if (b != null && jtc != null) {
+							if (b != null) {
 								//
-								jtc.setEditable(b.booleanValue());
+								setEditable(getValue(x), b.booleanValue());
 								//
 							} // if
 								//
@@ -555,6 +553,12 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 		} // if
 			//
+	}
+
+	private static void setEditable(final JTextComponent instance, final boolean editable) {
+		if (instance != null) {
+			instance.setEditable(editable);
+		}
 	}
 
 	private static Boolean value(final Editable instance) {
