@@ -1406,7 +1406,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			File file = null;
 			//
-			if (!GraphicsEnvironment.isHeadless() && !isTestMode()
+			if (Boolean.logicalAnd(!GraphicsEnvironment.isHeadless(), !isTestMode())
 					&& jfc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
 				//
 				file = jfc.getSelectedFile();
