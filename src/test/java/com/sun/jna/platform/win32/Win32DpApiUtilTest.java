@@ -27,6 +27,7 @@ import java.util.Map.Entry;
 import java.util.Objects;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.BooleanSupplier;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.regex.MatchResult;
@@ -71,7 +72,7 @@ class Win32DpApiUtilTest {
 			METHOD_PUT, METHOD_LOAD, METHOD_GET_CONTEXT_CLASS_LOADER, METHOD_TEST_AND_APPLY,
 			METHOD_GET_TOP_LEVEL_CLASSES, METHOD_MATCHER, METHOD_TO_LOWER_CASE, METHOD_MATCHES, METHOD_FIND,
 			METHOD_IS_ABSTRACT, METHOD_IS_ASSIGNABLE_FROM, METHOD_TEST_AND_GET, METHOD_TEST_AND_RUN, METHOD_CAST,
-			METHOD_IS_STATIC, METHOD_GET_TEXT, METHOD_SET_TEXT = null;
+			METHOD_IS_STATIC, METHOD_GET_TEXT, METHOD_SET_TEXT, METHOD_AND = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -145,11 +146,14 @@ class Win32DpApiUtilTest {
 		//
 		(METHOD_SET_TEXT = clz.getDeclaredMethod("setText", JTextComponent.class, String.class)).setAccessible(true);
 		//
+		(METHOD_AND = clz.getDeclaredMethod("and", Boolean.TYPE, Boolean.TYPE, BooleanSupplier.class))
+				.setAccessible(true);
+		//
 	}
 
 	private static class IH implements InvocationHandler {
 
-		private Boolean test, containsKey = null;
+		private Boolean test, containsKey, getAsBoolean = null;
 
 		private Integer modifiers = null;
 
@@ -230,6 +234,10 @@ class Win32DpApiUtilTest {
 			} else if (proxy instanceof ComboBoxModel && Objects.equals(name, "getSelectedItem")) {
 				//
 				return null;
+				//
+			} else if (proxy instanceof BooleanSupplier && Objects.equals(name, "getAsBoolean")) {
+				//
+				return getAsBoolean;
 				//
 			} // if
 				//
@@ -861,6 +869,31 @@ class Win32DpApiUtilTest {
 	void testSetText() throws IllegalAccessException, InvocationTargetException {
 		//
 		Assert.assertNull(invoke(METHOD_SET_TEXT, null, new JTextField(), null));
+		//
+	}
+
+	@Test
+	void testAnd() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertEquals(invoke(METHOD_AND, null, Boolean.TRUE, Boolean.TRUE, null), Boolean.FALSE);
+		//
+		if ((ih = ObjectUtils.getIfNull(ih, IH::new)) != null) {
+			//
+			ih.getAsBoolean = Boolean.FALSE;
+			//
+		} // if
+			//
+		final BooleanSupplier booleanSupplier = Reflection.newProxy(BooleanSupplier.class, ih);
+		//
+		Assert.assertEquals(invoke(METHOD_AND, null, Boolean.TRUE, Boolean.TRUE, booleanSupplier), Boolean.FALSE);
+		//
+		if (ih != null) {
+			//
+			ih.getAsBoolean = Boolean.TRUE;
+			//
+		} // if
+			//
+		Assert.assertEquals(invoke(METHOD_AND, null, Boolean.TRUE, Boolean.TRUE, booleanSupplier), Boolean.TRUE);
 		//
 	}
 

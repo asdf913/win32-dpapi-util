@@ -32,6 +32,7 @@ import java.util.Objects;
 import java.util.Set;
 import java.util.function.BiFunction;
 import java.util.function.BiPredicate;
+import java.util.function.BooleanSupplier;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Predicate;
@@ -1344,8 +1345,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			File file = null;
 			//
-			if (Boolean.logicalAnd(!GraphicsEnvironment.isHeadless(), !isTestMode())
-					&& jfc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+			if (and(!GraphicsEnvironment.isHeadless(), !isTestMode(),
+					() -> jfc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)) {
 				//
 				file = jfc.getSelectedFile();
 				//
@@ -1406,8 +1407,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			File file = null;
 			//
-			if (Boolean.logicalAnd(!GraphicsEnvironment.isHeadless(), !isTestMode())
-					&& jfc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION) {
+			if (and(!GraphicsEnvironment.isHeadless(), !isTestMode(),
+					() -> jfc.showOpenDialog(null) == JFileChooser.APPROVE_OPTION)) {
 				//
 				file = jfc.getSelectedFile();
 				//
@@ -1456,6 +1457,10 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 		} // if
 			//
+	}
+
+	private static boolean and(final boolean a, final boolean b, final BooleanSupplier booleanSupplier) {
+		return a && b && booleanSupplier != null && booleanSupplier.getAsBoolean();
 	}
 
 	private static void setText(final JTextComponent instance, final String text) {
