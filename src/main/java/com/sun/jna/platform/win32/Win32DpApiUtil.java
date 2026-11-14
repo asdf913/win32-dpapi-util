@@ -136,7 +136,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 	@Note("Entropy")
 	private JTextComponent jtcCryptUnprotectEntropy = null;
 
-	private JTextComponent jtcCryptProtectDescription = null;
+	private JTextComponent jtcCryptProtectDescription, jtcCryptProtectOutputFile, jtcCryptUnprotectOutputFile = null;
 
 	@Note("Output")
 	private JTextComponent jtcCryptProtectOutput = null;
@@ -408,6 +408,11 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				jPanel1.add(new JLabel("Ouptut"));
 				//
 				jPanel1.add(instance.jtcCryptProtectOutput = new JTextField(),
+						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
+				//
+				jPanel1.add(new JLabel("Output File"));
+				//
+				jPanel1.add(instance.jtcCryptProtectOutputFile = new JTextField(),
 						String.format("%1$s,span %2$s", growx, span));
 				//
 				jtp.add("CryptProtect", jPanel1);
@@ -449,6 +454,11 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel2.add(instance.jtcCryptUnprotectOutput = new JTextField(),
 						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
+				//
+				jPanel2.add(new JLabel("Output File"));
+				//
+				jPanel2.add(instance.jtcCryptUnprotectOutputFile = new JTextField(),
+						String.format("%1$s,span %2$s", growx, span));
 				//
 				jtp.add("CryptUnprotect", jPanel2);
 				//
@@ -1357,7 +1367,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 						testAndApply(NumberUtils::isDigits, getText(jtcCryptProtectFlags), Integer::valueOf, null),
 						getText(jtcCryptProtectDescription)), FileUtils::writeByteArrayToFile);
 				//
-				setText(jtcCryptProtectOutput, getAbsolutePath(fileOutput));
+				setText(jtcCryptProtectOutputFile, getAbsolutePath(fileOutput));
 				//
 			} catch (final IOException e) {
 				//
@@ -1459,7 +1469,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // if
 				//
-			setText(instance.jtcCryptUnprotectOutput, getAbsolutePath(fileOutput));
+			setText(instance.jtcCryptUnprotectOutputFile, getAbsolutePath(fileOutput));
 			//
 		} // if
 			//
