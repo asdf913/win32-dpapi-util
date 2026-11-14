@@ -392,25 +392,23 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				final String growx = "growx";
 				//
-				jPanel1.add(instance.jtcCryptProtectInput = new JTextField(),
-						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
+				final String layout = String.format("%1$s,span %2$s,%3$s", growx, span, wrap);
+				//
+				jPanel1.add(instance.jtcCryptProtectInput = new JTextField(), layout);
 				//
 				jPanel1.add(new JLabel("Flags"));
 				//
-				jPanel1.add(instance.jtcCryptProtectFlags = new JTextField(),
-						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
+				jPanel1.add(instance.jtcCryptProtectFlags = new JTextField(), layout);
 				//
 				jPanel1.add(new JLabel("Entropy"));
 				//
-				jPanel1.add(instance.jtcCryptProtectEntropy = new JTextField(),
-						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
+				jPanel1.add(instance.jtcCryptProtectEntropy = new JTextField(), layout);
 				//
 				final JLabel jLabel = new JLabel("Description");
 				//
 				jPanel1.add(jLabel);
 				//
-				jPanel1.add(instance.jtcCryptProtectDescription = new JTextField(),
-						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
+				jPanel1.add(instance.jtcCryptProtectDescription = new JTextField(), layout);
 				//
 				jPanel1.add(new JLabel());
 				//
@@ -421,8 +419,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel1.add(new JLabel("Ouptut"));
 				//
-				jPanel1.add(instance.jtcCryptProtectOutput = new JTextField(),
-						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
+				jPanel1.add(instance.jtcCryptProtectOutput = new JTextField(), layout);
 				//
 				jPanel1.add(new JLabel("Output File"));
 				//
@@ -442,18 +439,15 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel2.add(new JLabel(input), String.format("wmin %1$s", getWidth(jLabel.getPreferredSize())));
 				//
-				jPanel2.add(instance.jtcCryptUnprotectInput = new JTextField(),
-						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
+				jPanel2.add(instance.jtcCryptUnprotectInput = new JTextField(), layout);
 				//
 				jPanel2.add(new JLabel("Flags"));
 				//
-				jPanel2.add(instance.jtcCryptUnprotectFlags = new JTextField(),
-						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
+				jPanel2.add(instance.jtcCryptUnprotectFlags = new JTextField(), layout);
 				//
 				jPanel2.add(new JLabel("Entropy"));
 				//
-				jPanel2.add(instance.jtcCryptUnprotectEntropy = new JTextField(),
-						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
+				jPanel2.add(instance.jtcCryptUnprotectEntropy = new JTextField(), layout);
 				//
 				jPanel2.add(new JLabel(), String.format("%1$s,%2$s", growx, wrap));
 				//
@@ -466,8 +460,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel2.add(new JLabel("Ouptut"));
 				//
-				jPanel2.add(instance.jtcCryptUnprotectOutput = new JTextField(),
-						String.format("%1$s,span %2$s,%3$s", growx, span, wrap));
+				jPanel2.add(instance.jtcCryptUnprotectOutput = new JTextField(), layout);
 				//
 				jPanel2.add(new JLabel("Output File"));
 				//
