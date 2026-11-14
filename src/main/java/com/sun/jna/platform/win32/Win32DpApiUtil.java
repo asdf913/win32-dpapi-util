@@ -912,12 +912,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // if
 				//
-			final Class<?> clz = get(classMap, encoding);
-			//
-			final BinaryEncoder binaryEncoder = cast(BinaryEncoder.class, newInstance(clz));
-			//
 			info(LOG, testAndApply(Objects::nonNull,
-					binaryEncoder != null && bs != null ? binaryEncoder.encode(bs) : null, String::new, null));
+					encode(cast(BinaryEncoder.class, newInstance(get(classMap, encoding))), bs), String::new, null));
 			//
 		} else if (containsKey(map, "file")) {
 			//
@@ -1060,6 +1056,10 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 		return flags != null ? Crypt32Util.cryptUnprotectData(data, flags.intValue())
 				: Crypt32Util.cryptUnprotectData(data);
 		//
+	}
+
+	private static byte[] encode(final BinaryEncoder instance, final byte[] source) throws EncoderException {
+		return instance != null && source != null ? instance.encode(source) : null;
 	}
 
 	private static Object newInstance(final Class<?> instance) throws InstantiationException, IllegalAccessException {
@@ -1324,16 +1324,12 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // if
 				//
-			final Class<?> clz = get(encodingMap, encoding);
-			//
-			BinaryEncoder binaryEncoder = null;
-			//
 			try {
 				//
-				binaryEncoder = cast(BinaryEncoder.class, newInstance(clz));
-				//
-				setText(jtcCryptProtectOutput, testAndApply(Objects::nonNull,
-						binaryEncoder != null && bs != null ? binaryEncoder.encode(bs) : null, String::new, null));
+				setText(jtcCryptProtectOutput,
+						testAndApply(Objects::nonNull,
+								encode(cast(BinaryEncoder.class, newInstance(get(encodingMap, encoding))), bs),
+								String::new, null));
 				//
 			} catch (final InstantiationException | IllegalAccessException | EncoderException e) {
 				//

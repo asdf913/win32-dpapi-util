@@ -44,6 +44,7 @@ import javax.swing.JLabel;
 import javax.swing.JTextField;
 import javax.swing.text.JTextComponent;
 
+import org.apache.commons.codec.BinaryEncoder;
 import org.apache.commons.codec.DecoderException;
 import org.apache.commons.codec.EncoderException;
 import org.apache.commons.codec.binary.Hex;
@@ -242,6 +243,10 @@ class Win32DpApiUtilTest {
 			} else if (proxy instanceof BooleanSupplier && Objects.equals(name, "getAsBoolean")) {
 				//
 				return getAsBoolean;
+				//
+			} else if (proxy instanceof BinaryEncoder && Objects.equals(name, "encode")) {
+				//
+				return null;
 				//
 			} // if
 				//
