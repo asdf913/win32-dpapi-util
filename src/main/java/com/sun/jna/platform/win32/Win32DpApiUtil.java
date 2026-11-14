@@ -134,7 +134,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 	@Note("Entropy")
 	private JTextComponent jtcCryptUnprotectEntropy = null;
 
-	private JTextComponent jtcCryptProtectDescription = null;
+	private JTextComponent jtcCryptProtectDescription, jtcCryptProtectOutput, jtcCryptUnprotectOutput = null;
 
 	@Note("CryptProtect")
 	private transient ComboBoxModel<?> cbmCryptProtect = null;
@@ -382,6 +382,10 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel1.add(instance.btnCryptProtect = new JButton("Execute"), String.format("%1$s,%2$s", growx, wrap));
 				//
+				jPanel1.add(new JLabel("Ouptut"));
+				//
+				jPanel1.add(instance.jtcCryptProtectOutput = new JTextField(), String.format("%1$s,%2$s", growx, wrap));
+				//
 				jtp.add("CryptProtect", jPanel1);
 				//
 				final JPanel jPanel2 = new JPanel();
@@ -408,9 +412,16 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				jPanel2.add(instance.jtcCryptUnprotectEntropy = new JTextField(),
 						String.format("%1$s,%2$s", growx, wrap));
 				//
+				jPanel2.add(new JLabel(), String.format("%1$s,%2$s", growx, wrap));
+				//
 				jPanel2.add(new JLabel());
 				//
 				jPanel2.add(instance.btnCryptUnprotect = new JButton("Execute"),
+						String.format("%1$s,%2$s", growx, wrap));
+				//
+				jPanel2.add(new JLabel("Ouptut"));
+				//
+				jPanel2.add(instance.jtcCryptUnprotectOutput = new JTextField(),
 						String.format("%1$s,%2$s", growx, wrap));
 				//
 				jtp.add("CryptUnprotect", jPanel2);
@@ -1295,7 +1306,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				binaryEncoder = cast(BinaryEncoder.class, newInstance(clz));
 				//
-				info(LOG, testAndApply(Objects::nonNull,
+				setText(jtcCryptProtectOutput, testAndApply(Objects::nonNull,
 						binaryEncoder != null && bs != null ? binaryEncoder.encode(bs) : null, String::new, null));
 				//
 			} catch (final InstantiationException | IllegalAccessException | EncoderException e) {
@@ -1322,7 +1333,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			try {
 				//
-				info(LOG, testAndApply(Objects::nonNull, cryptUnprotectData(
+				setText(jtcCryptUnprotectOutput, testAndApply(Objects::nonNull, cryptUnprotectData(
 						toByteArray(getText(jtcCryptUnprotectInput), cast(BinaryDecoder.class, newInstance(clz))),
 						getBytes(getText(jtcCryptUnprotectEntropy)),
 						testAndApply(NumberUtils::isDigits, getText(jtcCryptUnprotectFlags), Integer::valueOf, null)),
@@ -1334,6 +1345,28 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // try
 				//
+		} // if
+			//
+	}
+
+	private static void setText(final JTextComponent instance, final String text) {
+		//
+		if (instance == null) {
+			//
+			return;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), "model")), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		if (field == null || Narcissus.getField(instance, field) != null) {
+			//
+			instance.setText(text);
+			//
 		} // if
 			//
 	}
