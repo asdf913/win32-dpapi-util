@@ -905,13 +905,13 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
 			//
-			if (!containsKey(classMap, encoding)) {
+			testAndRun(!containsKey(classMap, encoding), () -> {
 				//
 				throw new RuntimeException(String
 						.format("Please specify the encoding from the following encoding (%1$s). ", keySet(classMap)));
 				//
-			} // if
-				//
+			});
+			//
 			info(LOG, testAndApply(Objects::nonNull,
 					encode(cast(BinaryEncoder.class, newInstance(get(classMap, encoding))), bs), String::new, null));
 			//
@@ -973,13 +973,13 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			final String encoding = StringUtils.defaultIfEmpty(get(map, "encoding"), BASE64);
 			//
-			if (!containsKey(classMap, encoding)) {
+			testAndRun(!containsKey(classMap, encoding), () -> {
 				//
 				throw new RuntimeException(String
 						.format("Please specify the encoding from the following encoding (%1$s). ", keySet(classMap)));
 				//
-			} // if
-				//
+			});
+			//
 			final Class<?> clz = get(classMap, encoding);
 			//
 			info(LOG,
@@ -1317,13 +1317,13 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			final String encoding = StringUtils.defaultIfEmpty(Objects.toString(getSelectedItem(cbmCryptProtect)),
 					BASE64);
 			//
-			if (!containsKey(encodingMap, encoding)) {
+			testAndRun(!containsKey(encodingMap, encoding), () -> {
 				//
 				throw new RuntimeException(String.format(
 						"Please specify the encoding from the following encoding (%1$s). ", keySet(encodingMap)));
 				//
-			} // if
-				//
+			});
+			//
 			try {
 				//
 				setText(jtcCryptProtectOutput,
@@ -1370,13 +1370,13 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			final String encoding = StringUtils.defaultIfEmpty(Objects.toString(getSelectedItem(cbmCryptUnprotect)),
 					BASE64);
 			//
-			if (!containsKey(encodingMap, encoding)) {
+			testAndRun(!containsKey(encodingMap, encoding), () -> {
 				//
 				throw new RuntimeException(String.format(
 						"Please specify the encoding from the following encoding (%1$s). ", keySet(encodingMap)));
 				//
-			} // if
-				//
+			});
+			//
 			final Class<?> clz = get(encodingMap, encoding);
 			//
 			try {
