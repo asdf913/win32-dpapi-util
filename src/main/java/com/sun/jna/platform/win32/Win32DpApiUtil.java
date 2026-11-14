@@ -479,14 +479,14 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				forEach(map(
 						filter(stream(
 								testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
-								x -> isAssignableFrom(AbstractButton.class, x != null ? x.getType() : null)),
+								x -> isAssignableFrom(AbstractButton.class, getType(x))),
 						x -> cast(AbstractButton.class, Narcissus.getField(instance, x))), x -> {
 							addActionListener(x, instance);
 						});
 				//
 				forEach(map(filter(
 						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
-						x -> x != null && isAssignableFrom(JTextComponent.class, x.getType())
+						x -> x != null && isAssignableFrom(JTextComponent.class, getType(x))
 								&& x.isAnnotationPresent(Editable.class)),
 						x -> Pair.of(x != null && x.isAnnotationPresent(Editable.class)
 								? value(x.getAnnotation(Editable.class))
@@ -553,6 +553,10 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 		} // if
 			//
+	}
+
+	private static Class<?> getType(final Field instance) {
+		return instance != null ? instance.getType() : null;
 	}
 
 	private static void setEditable(final JTextComponent instance, final boolean editable) {

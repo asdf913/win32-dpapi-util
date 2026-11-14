@@ -75,7 +75,7 @@ class Win32DpApiUtilTest {
 			METHOD_GET_TOP_LEVEL_CLASSES, METHOD_MATCHER, METHOD_TO_LOWER_CASE, METHOD_MATCHES, METHOD_FIND,
 			METHOD_IS_ABSTRACT, METHOD_IS_ASSIGNABLE_FROM, METHOD_TEST_AND_GET, METHOD_TEST_AND_RUN, METHOD_CAST,
 			METHOD_IS_STATIC, METHOD_GET_TEXT, METHOD_SET_TEXT, METHOD_AND, METHOD_SHOW_OPEN_DIALOG,
-			METHOD_GET_NAME_CLASS = null;
+			METHOD_GET_NAME_CLASS, METHOD_GET_TYPE = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -156,6 +156,8 @@ class Win32DpApiUtilTest {
 				.setAccessible(true);
 		//
 		(METHOD_GET_NAME_CLASS = clz.getDeclaredMethod("getName", Class.class)).setAccessible(true);
+		//
+		(METHOD_GET_TYPE = clz.getDeclaredMethod("getType", Field.class)).setAccessible(true);
 		//
 	}
 
@@ -539,7 +541,7 @@ class Win32DpApiUtilTest {
 								//
 							} // if
 								//
-							if (Objects.equals(type = f.getType(), Boolean.class)) {
+							if (Objects.equals(type = getType(f), Boolean.class)) {
 								//
 								Narcissus.setField(ih, f, Boolean.TRUE);
 								//
@@ -613,6 +615,20 @@ class Win32DpApiUtilTest {
 				//
 		} // for
 			//
+	}
+
+	private static Class<?> getType(final Field instance) throws Throwable {
+		try {
+			final Object obj = invoke(METHOD_GET_TYPE, null, instance);
+			if (obj == null) {
+				return null;
+			} else if (obj instanceof Class) {
+				return (Class<?>) obj;
+			}
+			throw new Throwable(Objects.toString(getClass(obj)));
+		} catch (final InvocationTargetException e) {
+			throw e.getTargetException();
+		}
 	}
 
 	private static Class<?> getClass(final Object instance) throws Throwable {
