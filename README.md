@@ -59,6 +59,11 @@
 </tbody>
 </table>
 
+## Screen Shot
+
+### Microsoft Windows
+<img width="272" height="314" alt="image" src="https://github.com/user-attachments/assets/686421cd-fc5b-4b0d-83e2-3b2d13722b7f" />
+
 ## Reference
 
 <a href="https://learn.microsoft.com/en-us/windows/win32/api/dpapi">Dpapi.h header - Win32 apps | Microsoft Learn</a>
