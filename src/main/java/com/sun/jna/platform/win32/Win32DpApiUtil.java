@@ -134,7 +134,10 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 	@Note("Entropy")
 	private JTextComponent jtcCryptUnprotectEntropy = null;
 
-	private JTextComponent jtcCryptProtectDescription, jtcCryptProtectOutput, jtcCryptUnprotectOutput = null;
+	private JTextComponent jtcCryptProtectDescription = null;
+
+	@Note("Output")
+	private JTextComponent jtcCryptProtectOutput, jtcCryptUnprotectOutput = null;
 
 	@Note("CryptProtect")
 	private transient ComboBoxModel<?> cbmCryptProtect = null;
