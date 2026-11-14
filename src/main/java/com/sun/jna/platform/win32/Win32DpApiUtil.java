@@ -504,7 +504,6 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 							} // if
 								//
 						});
-				;
 				//
 			} else {
 				//
