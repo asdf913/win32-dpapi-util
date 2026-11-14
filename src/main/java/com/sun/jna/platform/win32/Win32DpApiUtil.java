@@ -1385,6 +1385,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			});
 			//
+			forEach(Stream.of(jtcCryptProtectOutput, jtcCryptProtectOutputFile), x -> setText(x, null));
+			//
 			try {
 				//
 				setText(jtcCryptProtectOutput,
@@ -1408,6 +1410,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 					() -> showOpenDialog(jfc, JFileChooser.APPROVE_OPTION)), () -> getSelectedFile(jfc));
 			//
 			final File fileOutput = new File(getParentFile(file), String.join(".", getName(file), CRYPT_PROTECT_DATA));
+			//
+			forEach(Stream.of(jtcCryptProtectOutput, jtcCryptProtectOutputFile), x -> setText(x, null));
 			//
 			try {
 				//
@@ -1443,6 +1447,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			});
 			//
 			final Class<?> clz = get(encodingMap, encoding);
+			//
+			forEach(Stream.of(jtcCryptUnprotectOutput, jtcCryptUnprotectOutputFile), x -> setText(x, null));
 			//
 			try {
 				//
@@ -1520,6 +1526,9 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // if
 				//
+			forEach(Stream.of(instance.jtcCryptUnprotectOutput, instance.jtcCryptUnprotectOutputFile),
+					x -> setText(x, null));
+			//
 			setText(instance.jtcCryptUnprotectOutputFile, getAbsolutePath(fileOutput));
 			//
 		} // if
