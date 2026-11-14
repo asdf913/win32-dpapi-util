@@ -154,7 +154,10 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 	@Note("CryptProtect")
 	private AbstractButton btnCryptProtectFile = null;
 
-	private AbstractButton btnCryptUnprotect, btnCryptUnprotectFile = null;
+	@Note("CryptUnprotect")
+	private AbstractButton btnCryptUnprotect = null;
+
+	private AbstractButton btnCryptUnprotectFile = null;
 
 	static {
 		//
