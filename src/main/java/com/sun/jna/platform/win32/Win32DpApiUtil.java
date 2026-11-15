@@ -80,6 +80,7 @@ import org.apache.commons.lang3.BooleanUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.lang3.function.FailableBiConsumer;
+import org.apache.commons.lang3.function.FailableConsumer;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.math.NumberUtils;
 import org.apache.commons.lang3.reflect.FieldUtils;
@@ -1690,13 +1691,11 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // if
 				//
-			if (and(and(file, Win32DpApiUtil::exists, Win32DpApiUtil::isDirectory), !GraphicsEnvironment.isHeadless(),
-					!isTestMode())) {
-				//
-				browse(Desktop.getDesktop(), toURI(file));
-				//
-			} // if
-				//
+			testAndAccept(
+					x -> and(and(x, Win32DpApiUtil::exists, Win32DpApiUtil::isDirectory),
+							!GraphicsEnvironment.isHeadless(), !isTestMode()),
+					file, x -> browse(Desktop.getDesktop(), toURI(x)));
+			//
 		} else if (Objects.equals(source, instance.btnCryptUnprotectBrowseOutputFile)) {
 			//
 			File file = testAndApply(Objects::nonNull, getText(instance.jtcCryptUnprotectOutputFile), File::new, null);
@@ -1707,15 +1706,20 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // if
 				//
-			if (and(and(file, Win32DpApiUtil::exists, Win32DpApiUtil::isDirectory), !GraphicsEnvironment.isHeadless(),
-					!isTestMode())) {
-				//
-				browse(Desktop.getDesktop(), toURI(file));
-				//
-			} // if
-				//
+			testAndAccept(
+					x -> and(and(x, Win32DpApiUtil::exists, Win32DpApiUtil::isDirectory),
+							!GraphicsEnvironment.isHeadless(), !isTestMode()),
+					file, x -> browse(Desktop.getDesktop(), toURI(x)));
+			//
 		} // if
 			//
+	}
+
+	private static <T, E extends Throwable> void testAndAccept(final Predicate<T> predicate, final T value,
+			final FailableConsumer<T, E> consumer) throws E {
+		if (test(predicate, value) && consumer != null) {
+			consumer.accept(value);
+		}
 	}
 
 	private static void browse(final Desktop instance, final URI uri) throws IOException {

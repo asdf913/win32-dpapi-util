@@ -56,6 +56,7 @@ import org.apache.commons.collections4.IterableUtils;
 import org.apache.commons.lang3.ArrayUtils;
 import org.apache.commons.lang3.ObjectUtils;
 import org.apache.commons.lang3.function.FailableBiConsumer;
+import org.apache.commons.lang3.function.FailableConsumer;
 import org.apache.commons.lang3.function.FailableFunction;
 import org.apache.commons.lang3.reflect.FieldUtils;
 import org.testng.Assert;
@@ -73,8 +74,8 @@ class Win32DpApiUtilTest {
 
 	private static Method METHOD_GET_NAME_MEMBER, METHOD_GET_NAME_FILE, METHOD_GET_CLASS, METHOD_GET_BYTES,
 			METHOD_TO_MAP, METHOD_COLLECT, METHOD_GET_ABSOLUTE_PATH, METHOD_ENDS_WITH, METHOD_CONTAINS_KEY,
-			METHOD_GET_PARENT_FILE, METHOD_CRYPT_PROTECT_DATA, METHOD_CRYPT_UNPROTECT_DATA, METHOD_TEST_AND_ACCEPT,
-			METHOD_PUT, METHOD_LOAD, METHOD_GET_CONTEXT_CLASS_LOADER, METHOD_TEST_AND_APPLY,
+			METHOD_GET_PARENT_FILE, METHOD_CRYPT_PROTECT_DATA, METHOD_CRYPT_UNPROTECT_DATA, METHOD_TEST_AND_ACCEPT3,
+			METHOD_TEST_AND_ACCEPT4, METHOD_PUT, METHOD_LOAD, METHOD_GET_CONTEXT_CLASS_LOADER, METHOD_TEST_AND_APPLY,
 			METHOD_GET_TOP_LEVEL_CLASSES, METHOD_MATCHER, METHOD_TO_LOWER_CASE, METHOD_MATCHES, METHOD_FIND,
 			METHOD_IS_ABSTRACT, METHOD_IS_ASSIGNABLE_FROM, METHOD_TEST_AND_GET, METHOD_TEST_AND_RUN, METHOD_CAST,
 			METHOD_IS_STATIC, METHOD_GET_TEXT, METHOD_SET_TEXT, METHOD_AND_2BOOLEAN_BOOLEAN_SUPPLIER,
@@ -112,7 +113,10 @@ class Win32DpApiUtilTest {
 		(METHOD_CRYPT_UNPROTECT_DATA = clz.getDeclaredMethod("cryptUnprotectData", Map.class, Map.class))
 				.setAccessible(true);
 		//
-		(METHOD_TEST_AND_ACCEPT = clz.getDeclaredMethod("testAndAccept", BiPredicate.class, Object.class, Object.class,
+		(METHOD_TEST_AND_ACCEPT3 = clz.getDeclaredMethod("testAndAccept", Predicate.class, Object.class,
+				FailableConsumer.class)).setAccessible(true);
+		//
+		(METHOD_TEST_AND_ACCEPT4 = clz.getDeclaredMethod("testAndAccept", BiPredicate.class, Object.class, Object.class,
 				FailableBiConsumer.class)).setAccessible(true);
 		//
 		(METHOD_PUT = clz.getDeclaredMethod("put", Map.class, Object.class, Object.class)).setAccessible(true);
@@ -843,7 +847,10 @@ class Win32DpApiUtilTest {
 		} // if
 			//
 		Assert.assertNull(
-				invoke(METHOD_TEST_AND_ACCEPT, null, Reflection.newProxy(BiPredicate.class, ih), null, null, null));
+				invoke(METHOD_TEST_AND_ACCEPT3, null, Reflection.newProxy(Predicate.class, ih), null, null));
+		//
+		Assert.assertNull(
+				invoke(METHOD_TEST_AND_ACCEPT4, null, Reflection.newProxy(BiPredicate.class, ih), null, null, null));
 		//
 	}
 
