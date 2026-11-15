@@ -432,15 +432,15 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				add(jPanel1, new JLabel("Ouptut"));
 				//
-				jPanel1.add(instance.jtcCryptProtectOutput = new JTextField(),
-						String.format("%1$s,span %2$s", growx, span));
+				final String layout3 = String.format("%1$s,span %2$s", growx, span);
+				//
+				jPanel1.add(instance.jtcCryptProtectOutput = new JTextField(), layout3);
 				//
 				jPanel1.add(instance.btnCryptProtectCopyOutput = new JButton("Copy"), wrap);
 				//
 				add(jPanel1, new JLabel("Output File"));
 				//
-				jPanel1.add(instance.jtcCryptProtectOutputFile = new JTextField(),
-						String.format("%1$s,span %2$s", growx, span));
+				jPanel1.add(instance.jtcCryptProtectOutputFile = new JTextField(), layout3);
 				//
 				jtp.add("CryptProtect", jPanel1);
 				//
@@ -480,15 +480,13 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				add(jPanel2, new JLabel("Ouptut"));
 				//
-				jPanel2.add(instance.jtcCryptUnprotectOutput = new JTextField(),
-						String.format("%1$s,span %2$s", growx, span));
+				jPanel2.add(instance.jtcCryptUnprotectOutput = new JTextField(), layout3);
 				//
 				jPanel2.add(instance.btnCryptUnprotectCopyOutput = new JButton("Copy"), wrap);
 				//
 				add(jPanel2, new JLabel("Output File"));
 				//
-				jPanel2.add(instance.jtcCryptUnprotectOutputFile = new JTextField(),
-						String.format("%1$s,span %2$s", growx, span));
+				jPanel2.add(instance.jtcCryptUnprotectOutputFile = new JTextField(), layout3);
 				//
 				jtp.add("CryptUnprotect", jPanel2);
 				//
