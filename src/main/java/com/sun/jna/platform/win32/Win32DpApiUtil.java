@@ -110,6 +110,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 
 	private static final String CRYPT_PROTECT_DATA = "cryptProtectData";
 
+	private static final String MODEL = "model";
+
 	@Target(ElementType.FIELD)
 	@Retention(RetentionPolicy.RUNTIME)
 	private @interface URL {
@@ -566,7 +568,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
 				collect(filter(
 						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
-						x -> Objects.equals(getName(x), "model")), Collectors.toList()),
+						x -> Objects.equals(getName(x), MODEL)), Collectors.toList()),
 				x -> IterableUtils.get(x, 0), null);
 		//
 		if (field == null || Narcissus.getField(instance, field) != null) {
@@ -1707,7 +1709,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
 				collect(filter(
 						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
-						x -> Objects.equals(getName(x), "model")), Collectors.toList()),
+						x -> Objects.equals(getName(x), MODEL)), Collectors.toList()),
 				x -> IterableUtils.get(x, 0), null);
 		//
 		if (field == null || Narcissus.getField(instance, field) != null) {
@@ -1737,7 +1739,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
 				collect(filter(
 						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
-						x -> Objects.equals(getName(x), "model")), Collectors.toList()),
+						x -> Objects.equals(getName(x), MODEL)), Collectors.toList()),
 				x -> IterableUtils.get(x, 0), null);
 		//
 		return field == null || Narcissus.getField(instance, field) != null ? instance.getText() : null;
