@@ -611,9 +611,10 @@ class Win32DpApiUtilTest {
 								Arrays.equals(parameterTypes, new Class<?>[] { Class.class }))
 						|| Boolean.logicalAnd(Objects.equals(name, "getWidth"),
 								Arrays.equals(parameterTypes, new Class<?>[] { Dimension2D.class }))
-						|| Boolean.logicalAnd(Objects.equals(name, "value"),
-								Arrays.equals(parameterTypes, new Class<?>[] {
-										Class.forName("com.sun.jna.platform.win32.Win32DpApiUtil$Editable") }))) {
+						|| Boolean.logicalAnd(Objects.equals(name, "value"), Arrays.equals(parameterTypes,
+								new Class<?>[] { Class.forName("com.sun.jna.platform.win32.Win32DpApiUtil$Editable") }))
+						|| Boolean.logicalAnd(Objects.equals(name, "getPreferredSize"),
+								Arrays.equals(parameterTypes, new Class<?>[] { Component.class }))) {
 					//
 					Assert.assertNotNull(result, toString);
 					//

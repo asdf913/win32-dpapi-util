@@ -1,6 +1,7 @@
 package com.sun.jna.platform.win32;
 
 import java.awt.Component;
+import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
@@ -438,7 +439,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				jPanel2.add(new JComboBox<>(instance.cbmCryptUnprotect = new DefaultComboBoxModel<>(encodings)),
 						String.format("wmin %1$s,span %2$s,%3$s", 160, span, wrap));
 				//
-				jPanel2.add(new JLabel(input), String.format("wmin %1$s", getWidth(jLabel.getPreferredSize())));
+				jPanel2.add(new JLabel(input), String.format("wmin %1$s", getWidth(getPreferredSize(jLabel))));
 				//
 				jPanel2.add(instance.jtcCryptUnprotectInput = new JTextField(), layout1);
 				//
@@ -450,7 +451,12 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel2.add(instance.jtcCryptUnprotectEntropy = new JTextField(), layout1);
 				//
-				jPanel2.add(new JLabel(), layout2);
+				final Dimension2D preferredSize = getPreferredSize(instance.jtcCryptProtectDescription);
+				//
+				jPanel2.add(new JLabel(),
+						preferredSize != null
+								? String.format("span %1$s,hmin %2$s,%3$s", span, preferredSize.getHeight(), wrap)
+								: String.format("span %1$s,%2$s", span, wrap));
 				//
 				jPanel2.add(new JLabel());
 				//
@@ -549,6 +555,10 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 		} // if
 			//
+	}
+
+	private static Dimension getPreferredSize(final Component instance) {
+		return instance != null ? instance.getPreferredSize() : null;
 	}
 
 	private static <T extends Annotation> T getAnnotation(final AnnotatedElement instance,
