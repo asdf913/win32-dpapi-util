@@ -62,7 +62,7 @@
 ## Screen Shot
 
 ### Microsoft Windows
-<img width="272" height="314" alt="image" src="https://github.com/user-attachments/assets/686421cd-fc5b-4b0d-83e2-3b2d13722b7f" />
+<img width="350" height="318" alt="Image" src="https://github.com/user-attachments/assets/0036f037-4bec-44e5-bf6b-04c08c269143" />
 
 ## Reference
 
