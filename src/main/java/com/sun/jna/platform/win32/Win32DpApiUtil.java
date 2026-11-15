@@ -513,9 +513,9 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			final JFrame jFrame = testAndGet(!GraphicsEnvironment.isHeadless(), JFrame::new);
 			//
+			setDefaultCloseOperation(jFrame, WindowConstants.EXIT_ON_CLOSE);
+			//
 			if (jFrame != null) {
-				//
-				jFrame.setDefaultCloseOperation(WindowConstants.EXIT_ON_CLOSE);
 				//
 				jFrame.add(instance);
 				//
@@ -555,6 +555,12 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 		} // if
 			//
+	}
+
+	private static void setDefaultCloseOperation(final JFrame instance, final int operation) {
+		if (instance != null) {
+			instance.setDefaultCloseOperation(operation);
+		}
 	}
 
 	private static Dimension getPreferredSize(final Component instance) {
