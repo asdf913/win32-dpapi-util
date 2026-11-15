@@ -1690,8 +1690,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // if
 				//
-			if (and(file, Win32DpApiUtil::exists, Win32DpApiUtil::isDirectory) && !GraphicsEnvironment.isHeadless()
-					&& !isTestMode()) {
+			if (Boolean.logicalAnd(and(file, Win32DpApiUtil::exists, Win32DpApiUtil::isDirectory),
+					!GraphicsEnvironment.isHeadless()) && !isTestMode()) {
 				//
 				browse(Desktop.getDesktop(), toURI(file));
 				//
@@ -1707,8 +1707,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // if
 				//
-			if (and(file, Win32DpApiUtil::exists, Win32DpApiUtil::isDirectory) && !GraphicsEnvironment.isHeadless()
-					&& !isTestMode()) {
+			if (Boolean.logicalAnd(and(file, Win32DpApiUtil::exists, Win32DpApiUtil::isDirectory),
+					!GraphicsEnvironment.isHeadless()) && !isTestMode()) {
 				//
 				browse(Desktop.getDesktop(), toURI(file));
 				//
