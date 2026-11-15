@@ -2,6 +2,8 @@ package com.sun.jna.platform.win32;
 
 import java.awt.Component;
 import java.awt.Dimension;
+import java.awt.GraphicsEnvironment;
+import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
 import java.awt.geom.Dimension2D;
 import java.io.File;
@@ -536,6 +538,10 @@ class Win32DpApiUtilTest {
 					//
 					add(collection, Narcissus.allocateInstance(JButton.class));
 					//
+				} else if (Objects.equals(parameterType, Toolkit.class)) {
+					//
+					add(collection, Narcissus.allocateInstance(getClass(Toolkit.getDefaultToolkit())));
+					//
 				} else if (parameterType != null && parameterType.isInterface()) {
 					//
 					if ((ih = ObjectUtils.getIfNull(ih, IH::new)) != null) {
@@ -617,7 +623,11 @@ class Win32DpApiUtilTest {
 						|| Boolean.logicalAnd(Objects.equals(name, "value"), Arrays.equals(parameterTypes,
 								new Class<?>[] { Class.forName("com.sun.jna.platform.win32.Win32DpApiUtil$Editable") }))
 						|| Boolean.logicalAnd(Objects.equals(name, "getPreferredSize"),
-								Arrays.equals(parameterTypes, new Class<?>[] { Component.class }))) {
+								Arrays.equals(parameterTypes, new Class<?>[] { Component.class }))
+						|| Boolean.logicalAnd(
+								Boolean.logicalAnd(Objects.equals(name, "getSystemClipboard"),
+										Arrays.equals(parameterTypes, new Class<?>[] { Toolkit.class })),
+								!GraphicsEnvironment.isHeadless())) {
 					//
 					Assert.assertNotNull(result, toString);
 					//
@@ -1018,6 +1028,22 @@ class Win32DpApiUtilTest {
 		FieldUtils.writeDeclaredField(instance, "btnCryptUnprotectFile", btnCryptUnprotectFile, true);
 		//
 		instance.actionPerformed(new ActionEvent(btnCryptUnprotectFile, 0, null));
+		//
+		// btnCryptProtectCopyOutput
+		//
+		final AbstractButton btnCryptProtectCopyOutput = new JButton();
+		//
+		FieldUtils.writeDeclaredField(instance, "btnCryptProtectCopyOutput", btnCryptProtectCopyOutput, true);
+		//
+		instance.actionPerformed(new ActionEvent(btnCryptProtectCopyOutput, 0, null));
+		//
+		// btnCryptProtectCopyOutput
+		//
+		final AbstractButton btnCryptUnprotectCopyOutput = new JButton();
+		//
+		FieldUtils.writeDeclaredField(instance, "btnCryptUnprotectCopyOutput", btnCryptUnprotectCopyOutput, true);
+		//
+		instance.actionPerformed(new ActionEvent(btnCryptUnprotectCopyOutput, 0, null));
 		//
 	}
 
