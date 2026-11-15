@@ -399,7 +399,7 @@ class Win32DpApiUtilTest {
 							Arrays.equals(parameterTypes, new Class<?>[] { String.class, String.class }))
 					|| Boolean.logicalAnd(Objects.equals(name, "actionPerformed"),
 							Arrays.equals(parameterTypes, new Class<?>[] { ActionEvent.class }))
-					|| Boolean.logicalAnd(Objects.equals(name, "main"),
+					|| Boolean.logicalAnd(Objects.equals(name, "perform"),
 							Arrays.equals(parameterTypes, new Class<?>[] { Map.class }))) {
 				//
 				final Method m1 = m;
@@ -588,7 +588,7 @@ class Win32DpApiUtilTest {
 			//
 			if (Boolean.logicalAnd(Objects.equals(name = getName(m), "actionPerformed"),
 					Arrays.equals(parameterTypes, new Class<?>[] { ActionEvent.class }))
-					|| Boolean.logicalAnd(Objects.equals(name, "main"),
+					|| Boolean.logicalAnd(Objects.equals(name, "perform"),
 							Arrays.equals(parameterTypes, new Class<?>[] { Map.class }))) {
 				//
 				final Method m1 = m;

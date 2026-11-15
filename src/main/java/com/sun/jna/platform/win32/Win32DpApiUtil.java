@@ -534,11 +534,11 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 		} // if
 			//
-		main(map);
+		perform(map);
 		//
 	}
 
-	private static void main(final Map<String, String> map)
+	private static void perform(final Map<String, String> map)
 			throws InstantiationException, IllegalAccessException, IOException, EncoderException, DecoderException {
 		//
 		final String action = get(map, "action");
