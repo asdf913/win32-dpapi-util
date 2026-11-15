@@ -1,6 +1,7 @@
 package com.sun.jna.platform.win32;
 
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.event.ActionEvent;
@@ -372,7 +373,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel1.setLayout(new MigLayout());
 				//
-				jPanel1.add(new JLabel("Encoding"));
+				add(jPanel1, new JLabel("Encoding"));
 				//
 				final Map<String, Class<?>> encodingMap = getEncodingMap(getContextClassLoader(Thread.currentThread()));
 				//
@@ -389,7 +390,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				final String input = "Input";
 				//
-				jPanel1.add(new JLabel(input));
+				add(jPanel1, new JLabel(input));
 				//
 				final String growx = "growx";
 				//
@@ -397,21 +398,21 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel1.add(instance.jtcCryptProtectInput = new JTextField(), layout1);
 				//
-				jPanel1.add(new JLabel("Flags"));
+				add(jPanel1, new JLabel("Flags"));
 				//
 				jPanel1.add(instance.jtcCryptProtectFlags = new JTextField(), layout1);
 				//
-				jPanel1.add(new JLabel("Entropy"));
+				add(jPanel1, new JLabel("Entropy"));
 				//
 				jPanel1.add(instance.jtcCryptProtectEntropy = new JTextField(), layout1);
 				//
 				final JLabel jLabel = new JLabel("Description");
 				//
-				jPanel1.add(jLabel);
+				add(jPanel1, jLabel);
 				//
 				jPanel1.add(instance.jtcCryptProtectDescription = new JTextField(), layout1);
 				//
-				jPanel1.add(new JLabel());
+				add(jPanel1, new JLabel());
 				//
 				jPanel1.add(instance.btnCryptProtect = new JButton(input), growx);
 				//
@@ -419,11 +420,11 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel1.add(instance.btnCryptProtectFile = new JButton("File"), layout2);
 				//
-				jPanel1.add(new JLabel("Ouptut"));
+				add(jPanel1, new JLabel("Ouptut"));
 				//
 				jPanel1.add(instance.jtcCryptProtectOutput = new JTextField(), layout1);
 				//
-				jPanel1.add(new JLabel("Output File"));
+				add(jPanel1, new JLabel("Output File"));
 				//
 				jPanel1.add(instance.jtcCryptProtectOutputFile = new JTextField(),
 						String.format("%1$s,span %2$s", growx, span));
@@ -434,7 +435,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel2.setLayout(new MigLayout());
 				//
-				jPanel2.add(new JLabel("Encoding"));
+				add(jPanel2, new JLabel("Encoding"));
 				//
 				jPanel2.add(new JComboBox<>(instance.cbmCryptUnprotect = new DefaultComboBoxModel<>(encodings)),
 						String.format("wmin %1$s,span %2$s,%3$s", 160, span, wrap));
@@ -443,11 +444,11 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel2.add(instance.jtcCryptUnprotectInput = new JTextField(), layout1);
 				//
-				jPanel2.add(new JLabel("Flags"));
+				add(jPanel2, new JLabel("Flags"));
 				//
 				jPanel2.add(instance.jtcCryptUnprotectFlags = new JTextField(), layout1);
 				//
-				jPanel2.add(new JLabel("Entropy"));
+				add(jPanel2, new JLabel("Entropy"));
 				//
 				jPanel2.add(instance.jtcCryptUnprotectEntropy = new JTextField(), layout1);
 				//
@@ -458,17 +459,17 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 								? String.format("span %1$s,hmin %2$s,%3$s", span, preferredSize.getHeight(), wrap)
 								: String.format("span %1$s,%2$s", span, wrap));
 				//
-				jPanel2.add(new JLabel());
+				add(jPanel2, new JLabel());
 				//
 				jPanel2.add(instance.btnCryptUnprotect = new JButton(input), growx);
 				//
 				jPanel2.add(instance.btnCryptUnprotectFile = new JButton("File"), layout2);
 				//
-				jPanel2.add(new JLabel("Ouptut"));
+				add(jPanel2, new JLabel("Ouptut"));
 				//
 				jPanel2.add(instance.jtcCryptUnprotectOutput = new JTextField(), layout1);
 				//
-				jPanel2.add(new JLabel("Output File"));
+				add(jPanel2, new JLabel("Output File"));
 				//
 				jPanel2.add(instance.jtcCryptUnprotectOutputFile = new JTextField(),
 						String.format("%1$s,span %2$s", growx, span));
@@ -515,9 +516,9 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			setDefaultCloseOperation(jFrame, WindowConstants.EXIT_ON_CLOSE);
 			//
+			add(jFrame, instance);
+			//
 			if (jFrame != null) {
-				//
-				jFrame.add(instance);
 				//
 				jFrame.pack();
 				//
@@ -552,6 +553,28 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 		} else {
 			//
 			throw new RuntimeException(action);
+			//
+		} // if
+			//
+	}
+
+	private static void add(final Container instance, final Component comp) {
+		//
+		if (instance == null) {
+			//
+			return;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), "component")), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		if (field == null || Narcissus.getField(instance, field) != null) {
+			//
+			instance.add(comp);
 			//
 		} // if
 			//
