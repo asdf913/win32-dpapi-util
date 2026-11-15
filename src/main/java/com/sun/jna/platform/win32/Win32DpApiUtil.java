@@ -1684,9 +1684,9 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			File file = testAndApply(Objects::nonNull, getText(instance.jtcCryptProtectOutputFile), File::new, null);
 			//
-			if (exists(file) && isFile(file) && file != null) {
+			if (and(file, Win32DpApiUtil::exists, Win32DpApiUtil::isFile)) {
 				//
-				file = file.getParentFile();
+				file = getParentFile(file);
 				//
 			} // if
 				//
@@ -1701,9 +1701,9 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			File file = testAndApply(Objects::nonNull, getText(instance.jtcCryptUnprotectOutputFile), File::new, null);
 			//
-			if (exists(file) && isFile(file) && file != null) {
+			if (and(file, Win32DpApiUtil::exists, Win32DpApiUtil::isFile)) {
 				//
-				file = file.getParentFile();
+				file = getParentFile(file);
 				//
 			} // if
 				//
