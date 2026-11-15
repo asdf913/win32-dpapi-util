@@ -725,10 +725,24 @@ class Win32DpApiUtilTest {
 	}
 
 	@Test
-	void testGetAbsolutePath() throws IllegalAccessException, InvocationTargetException {
+	void testGetAbsolutePath() throws Throwable {
 		//
-		Assert.assertNotNull(invoke(METHOD_GET_ABSOLUTE_PATH, null, new File(".")));
+		Assert.assertNotNull(getAbsolutePath(new File(".")));
 		//
+	}
+
+	private static String getAbsolutePath(final File instance) throws Throwable {
+		try {
+			final Object obj = invoke(METHOD_GET_ABSOLUTE_PATH, null, instance);
+			if (obj == null) {
+				return null;
+			} else if (obj instanceof String) {
+				return (String) obj;
+			}
+			throw new Throwable(Objects.toString(getClass(obj)));
+		} catch (final InvocationTargetException e) {
+			throw e.getTargetException();
+		}
 	}
 
 	@Test
@@ -996,7 +1010,7 @@ class Win32DpApiUtilTest {
 	}
 
 	@Test
-	void testActionPerformed() throws IllegalAccessException {
+	void testActionPerformed() throws Throwable {
 		//
 		if (instance == null) {
 			//
@@ -1044,6 +1058,52 @@ class Win32DpApiUtilTest {
 		FieldUtils.writeDeclaredField(instance, "btnCryptUnprotectCopyOutput", btnCryptUnprotectCopyOutput, true);
 		//
 		instance.actionPerformed(new ActionEvent(btnCryptUnprotectCopyOutput, 0, null));
+		//
+		// btnCryptProtectBrowseOutputFile
+		//
+		final AbstractButton btnCryptProtectBrowseOutputFile = new JButton();
+		//
+		FieldUtils.writeDeclaredField(instance, "btnCryptProtectBrowseOutputFile", btnCryptProtectBrowseOutputFile,
+				true);
+		//
+		ActionEvent actionEvent = new ActionEvent(btnCryptProtectBrowseOutputFile, 0, null);
+		//
+		instance.actionPerformed(actionEvent);
+		//
+		// jtcCryptProtectOutputFile
+		//
+		final File file = new File("pom.xml");
+		//
+		final JTextComponent jtcCryptProtectOutputFile = new JTextField(getAbsolutePath(file));
+		//
+		FieldUtils.writeDeclaredField(instance, "jtcCryptProtectOutputFile", jtcCryptProtectOutputFile, true);
+		//
+		instance.actionPerformed(actionEvent);
+		//
+		jtcCryptProtectOutputFile.setText(getAbsolutePath(file.getParentFile()));
+		//
+		instance.actionPerformed(actionEvent);
+		//
+		// btnCryptUnprotectBrowseOutputFile
+		//
+		final AbstractButton btnCryptUnprotectBrowseOutputFile = new JButton();
+		//
+		FieldUtils.writeDeclaredField(instance, "btnCryptUnprotectBrowseOutputFile", btnCryptUnprotectBrowseOutputFile,
+				true);
+		//
+		instance.actionPerformed(actionEvent = new ActionEvent(btnCryptUnprotectBrowseOutputFile, 0, null));
+		//
+		// jtcCryptUnprotectOutputFile
+		//
+		final JTextComponent jtcCryptUnprotectOutputFile = new JTextField(getAbsolutePath(file));
+		//
+		FieldUtils.writeDeclaredField(instance, "jtcCryptUnprotectOutputFile", jtcCryptUnprotectOutputFile, true);
+		//
+		instance.actionPerformed(actionEvent);
+		//
+		jtcCryptUnprotectOutputFile.setText(getAbsolutePath(file.getParentFile()));
+		//
+		instance.actionPerformed(actionEvent);
 		//
 	}
 

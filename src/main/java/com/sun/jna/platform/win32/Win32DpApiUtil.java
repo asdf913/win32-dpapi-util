@@ -2,6 +2,7 @@ package com.sun.jna.platform.win32;
 
 import java.awt.Component;
 import java.awt.Container;
+import java.awt.Desktop;
 import java.awt.Dimension;
 import java.awt.GraphicsEnvironment;
 import java.awt.Toolkit;
@@ -29,6 +30,7 @@ import java.lang.reflect.Member;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.lang.reflect.Proxy;
+import java.net.URI;
 import java.nio.file.FileSystems;
 import java.util.Arrays;
 import java.util.Collection;
@@ -187,7 +189,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 	@Note("CryptUnprotect")
 	private AbstractButton btnCryptUnprotectFile = null;
 
-	private AbstractButton btnCryptUnprotectCopyOutput = null;
+	private AbstractButton btnCryptUnprotectCopyOutput, btnCryptProtectBrowseOutputFile,
+			btnCryptUnprotectBrowseOutputFile = null;
 
 	static {
 		//
@@ -439,11 +442,14 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel1.add(instance.jtcCryptProtectOutput = new JTextField(), layout3);
 				//
-				jPanel1.add(instance.btnCryptProtectCopyOutput = new JButton("Copy"), wrap);
+				jPanel1.add(instance.btnCryptProtectCopyOutput = new JButton("Copy"),
+						String.format("%1$s,%2$s", growx, wrap));
 				//
 				add(jPanel1, new JLabel("Output File"));
 				//
 				jPanel1.add(instance.jtcCryptProtectOutputFile = new JTextField(), layout3);
+				//
+				add(jPanel1, instance.btnCryptProtectBrowseOutputFile = new JButton("Browse"));
 				//
 				jtp.add("CryptProtect", jPanel1);
 				//
@@ -485,11 +491,14 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel2.add(instance.jtcCryptUnprotectOutput = new JTextField(), layout3);
 				//
-				jPanel2.add(instance.btnCryptUnprotectCopyOutput = new JButton("Copy"), wrap);
+				jPanel2.add(instance.btnCryptUnprotectCopyOutput = new JButton("Copy"),
+						String.format("%1$s,%2$s", growx, wrap));
 				//
 				add(jPanel2, new JLabel("Output File"));
 				//
 				jPanel2.add(instance.jtcCryptUnprotectOutputFile = new JTextField(), layout3);
+				//
+				add(jPanel2, instance.btnCryptUnprotectBrowseOutputFile = new JButton("Browse"));
 				//
 				jtp.add("CryptUnprotect", jPanel2);
 				//
@@ -523,7 +532,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 								//
 						});
 				//
-				forEach(Stream.of(instance.btnCryptProtectCopyOutput, instance.btnCryptUnprotectCopyOutput),
+				forEach(Stream.of(instance.btnCryptProtectCopyOutput, instance.btnCryptProtectBrowseOutputFile,
+						instance.btnCryptUnprotectCopyOutput, instance.btnCryptUnprotectBrowseOutputFile),
 						x -> setEnabled(x, false));
 				//
 			} else {
@@ -1494,6 +1504,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			setEnabled(btnCryptProtectCopyOutput, true);
 			//
+			setEnabled(btnCryptProtectBrowseOutputFile, false);
+			//
 			try {
 				//
 				setText(jtcCryptProtectOutput,
@@ -1521,6 +1533,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			forEach(Stream.of(jtcCryptProtectOutput, jtcCryptProtectOutputFile), x -> setText(x, null));
 			//
 			setEnabled(btnCryptProtectCopyOutput, false);
+			//
+			setEnabled(btnCryptProtectBrowseOutputFile, true);
 			//
 			try {
 				//
@@ -1560,6 +1574,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			forEach(Stream.of(jtcCryptUnprotectOutput, jtcCryptUnprotectOutputFile), x -> setText(x, null));
 			//
 			setEnabled(btnCryptUnprotectCopyOutput, true);
+			//
+			setEnabled(btnCryptUnprotectBrowseOutputFile, false);
 			//
 			try {
 				//
@@ -1644,6 +1660,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			setEnabled(instance.btnCryptUnprotectCopyOutput, false);
 			//
+			setEnabled(instance.btnCryptUnprotectBrowseOutputFile, true);
+			//
 		} else if (Objects.equals(source, instance.btnCryptProtectCopyOutput)) {
 			//
 			testAndRun(!isTestMode(), () -> setContents(getSystemClipboard(Toolkit.getDefaultToolkit()),
@@ -1653,6 +1671,62 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			testAndRun(!isTestMode(), () -> setContents(getSystemClipboard(Toolkit.getDefaultToolkit()),
 					new StringSelection(getText(instance.jtcCryptUnprotectOutput)), null));
+			//
+		} else if (Objects.equals(source, instance.btnCryptProtectBrowseOutputFile)) {
+			//
+			File file = testAndApply(Objects::nonNull, getText(instance.jtcCryptProtectOutputFile), File::new, null);
+			//
+			if (exists(file) && isFile(file) && file != null) {
+				//
+				file = file.getParentFile();
+				//
+			} // if
+				//
+			if (exists(file) && file != null && file.isDirectory() && !GraphicsEnvironment.isHeadless()
+					&& !isTestMode()) {
+				//
+				browse(Desktop.getDesktop(), file.toURI());
+				//
+			} // if
+				//
+		} else if (Objects.equals(source, instance.btnCryptUnprotectBrowseOutputFile)) {
+			//
+			File file = testAndApply(Objects::nonNull, getText(instance.jtcCryptUnprotectOutputFile), File::new, null);
+			//
+			if (exists(file) && isFile(file) && file != null) {
+				//
+				file = file.getParentFile();
+				//
+			} // if
+				//
+			if (exists(file) && file != null && file.isDirectory() && !GraphicsEnvironment.isHeadless()
+					&& !isTestMode()) {
+				//
+				browse(Desktop.getDesktop(), file.toURI());
+				//
+			} // if
+				//
+		} // if
+			//
+	}
+
+	private static void browse(final Desktop instance, final URI uri) throws IOException {
+		//
+		if (instance == null) {
+			//
+			return;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(
+						stream(testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+						x -> Objects.equals(getName(x), "peer")), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		if (field == null || Narcissus.getField(instance, field) != null) {
+			//
+			instance.browse(uri);
 			//
 		} // if
 			//
