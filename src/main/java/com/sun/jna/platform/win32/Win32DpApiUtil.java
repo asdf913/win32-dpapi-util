@@ -444,8 +444,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel1.add(instance.jtcCryptProtectOutput = new JTextField(), layout3);
 				//
-				jPanel1.add(instance.btnCryptProtectCopyOutput = new JButton("Copy"),
-						String.format("%1$s,%2$s", growx, wrap));
+				jPanel1.add(instance.btnCryptProtectCopyOutput = new JButton("Copy"), layout2);
 				//
 				add(jPanel1, new JLabel("Output File"));
 				//
@@ -493,8 +492,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 				jPanel2.add(instance.jtcCryptUnprotectOutput = new JTextField(), layout3);
 				//
-				jPanel2.add(instance.btnCryptUnprotectCopyOutput = new JButton("Copy"),
-						String.format("%1$s,%2$s", growx, wrap));
+				jPanel2.add(instance.btnCryptUnprotectCopyOutput = new JButton("Copy"), layout2);
 				//
 				add(jPanel2, new JLabel("Output File"));
 				//
