@@ -78,7 +78,7 @@ class Win32DpApiUtilTest {
 			METHOD_GET_TOP_LEVEL_CLASSES, METHOD_MATCHER, METHOD_TO_LOWER_CASE, METHOD_MATCHES, METHOD_FIND,
 			METHOD_IS_ABSTRACT, METHOD_IS_ASSIGNABLE_FROM, METHOD_TEST_AND_GET, METHOD_TEST_AND_RUN, METHOD_CAST,
 			METHOD_IS_STATIC, METHOD_GET_TEXT, METHOD_SET_TEXT, METHOD_AND, METHOD_SHOW_OPEN_DIALOG,
-			METHOD_GET_NAME_CLASS, METHOD_GET_TYPE = null;
+			METHOD_GET_NAME_CLASS, METHOD_GET_TYPE, METHOD_TO_URI, METHOD_IS_DIRECTORY = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -161,6 +161,10 @@ class Win32DpApiUtilTest {
 		(METHOD_GET_NAME_CLASS = clz.getDeclaredMethod("getName", Class.class)).setAccessible(true);
 		//
 		(METHOD_GET_TYPE = clz.getDeclaredMethod("getType", Field.class)).setAccessible(true);
+		//
+		(METHOD_TO_URI = clz.getDeclaredMethod("toURI", File.class)).setAccessible(true);
+		//
+		(METHOD_IS_DIRECTORY = clz.getDeclaredMethod("isDirectory", File.class)).setAccessible(true);
 		//
 	}
 
@@ -1006,6 +1010,20 @@ class Win32DpApiUtilTest {
 		//
 		Assert.assertEquals(invoke(METHOD_SHOW_OPEN_DIALOG, null, new JFileChooser(), JFileChooser.APPROVE_OPTION),
 				Boolean.FALSE);
+		//
+	}
+
+	@Test
+	void testToURI() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertNotNull(invoke(METHOD_TO_URI, null, new File(".")));
+		//
+	}
+
+	@Test
+	void testIsDirectory() throws IllegalAccessException, InvocationTargetException {
+		//
+		Assert.assertEquals(invoke(METHOD_IS_DIRECTORY, null, new File("pom.xml")), Boolean.FALSE);
 		//
 	}
 

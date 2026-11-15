@@ -1269,6 +1269,14 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 		return test(a, value) && test(b, value);
 	}
 
+	private static URI toURI(final File instance) {
+		return instance != null && instance.getPath() != null ? instance.toURI() : null;
+	}
+
+	private static boolean isDirectory(final File instance) {
+		return instance != null && instance.getPath() != null && instance.isDirectory();
+	}
+
 	private static boolean isFile(final File instance) {
 		return instance != null && instance.getPath() != null && instance.isFile();
 	}
@@ -1682,10 +1690,9 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // if
 				//
-			if (exists(file) && file != null && file.isDirectory() && !GraphicsEnvironment.isHeadless()
-					&& !isTestMode()) {
+			if (exists(file) && isDirectory(file) && !GraphicsEnvironment.isHeadless() && !isTestMode()) {
 				//
-				browse(Desktop.getDesktop(), file.toURI());
+				browse(Desktop.getDesktop(), toURI(file));
 				//
 			} // if
 				//
@@ -1699,10 +1706,9 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // if
 				//
-			if (exists(file) && file != null && file.isDirectory() && !GraphicsEnvironment.isHeadless()
-					&& !isTestMode()) {
+			if (exists(file) && isDirectory(file) && !GraphicsEnvironment.isHeadless() && !isTestMode()) {
 				//
-				browse(Desktop.getDesktop(), file.toURI());
+				browse(Desktop.getDesktop(), toURI(file));
 				//
 			} // if
 				//
