@@ -891,7 +891,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 
 	private static Matcher matcher(final Pattern instance, final String input) {
 		//
-		if (Boolean.logicalOr(instance == null, input == null)) {
+		if (instance == null || input == null) {
 			//
 			return null;
 			//
