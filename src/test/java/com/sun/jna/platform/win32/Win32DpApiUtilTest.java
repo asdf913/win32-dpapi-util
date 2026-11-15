@@ -6,7 +6,6 @@ import java.awt.event.ActionEvent;
 import java.awt.geom.Dimension2D;
 import java.io.File;
 import java.io.IOException;
-import java.lang.annotation.Annotation;
 import java.lang.management.RuntimeMXBean;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Array;
@@ -399,7 +398,9 @@ class Win32DpApiUtilTest {
 					|| Boolean.logicalAnd(Objects.equals(name, "toByteArray"),
 							Arrays.equals(parameterTypes, new Class<?>[] { String.class, String.class }))
 					|| Boolean.logicalAnd(Objects.equals(name, "actionPerformed"),
-							Arrays.equals(parameterTypes, new Class<?>[] { ActionEvent.class }))) {
+							Arrays.equals(parameterTypes, new Class<?>[] { ActionEvent.class }))
+					|| Boolean.logicalAnd(Objects.equals(name, "main"),
+							Arrays.equals(parameterTypes, new Class<?>[] { Map.class }))) {
 				//
 				final Method m1 = m;
 				//
@@ -586,7 +587,9 @@ class Win32DpApiUtilTest {
 			toString = Objects.toString(m);
 			//
 			if (Boolean.logicalAnd(Objects.equals(name = getName(m), "actionPerformed"),
-					Arrays.equals(parameterTypes, new Class<?>[] { ActionEvent.class }))) {
+					Arrays.equals(parameterTypes, new Class<?>[] { ActionEvent.class }))
+					|| Boolean.logicalAnd(Objects.equals(name, "main"),
+							Arrays.equals(parameterTypes, new Class<?>[] { Map.class }))) {
 				//
 				final Method m1 = m;
 				//

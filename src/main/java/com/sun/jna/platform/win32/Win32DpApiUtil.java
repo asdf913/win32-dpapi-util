@@ -534,6 +534,13 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 		} // if
 			//
+		main(map);
+		//
+	}
+
+	private static void main(final Map<String, String> map)
+			throws InstantiationException, IllegalAccessException, IOException, EncoderException, DecoderException {
+		//
 		final String action = get(map, "action");
 		//
 		final Map<String, Class<?>> encodingMap = getEncodingMap(getContextClassLoader(Thread.currentThread()));
