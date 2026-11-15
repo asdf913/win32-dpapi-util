@@ -518,12 +518,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 			add(jFrame, instance);
 			//
-			if (jFrame != null) {
-				//
-				jFrame.pack();
-				//
-			} // if
-				//
+			pack(jFrame);
+			//
 			testAndRun(!isTestMode(), () -> setVisible(jFrame, true));
 			//
 			return;
@@ -553,6 +549,27 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 		} else {
 			//
 			throw new RuntimeException(action);
+			//
+		} // if
+			//
+	}
+
+	private static void pack(final JFrame instance) {
+		//
+		if (instance == null || GraphicsEnvironment.isHeadless()) {
+			//
+			return;
+			//
+		} // if
+			//
+		final Field field = testAndApply(x -> IterableUtils.size(x) == 1,
+				collect(filter(FieldUtils.getAllFieldsList(getClass(instance)).stream(),
+						f -> Objects.equals(getName(f), "objectLock")), Collectors.toList()),
+				x -> IterableUtils.get(x, 0), null);
+		//
+		if (field == null || Narcissus.getField(instance, field) != null) {
+			//
+			instance.pack();
 			//
 		} // if
 			//
