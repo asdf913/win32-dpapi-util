@@ -77,8 +77,9 @@ class Win32DpApiUtilTest {
 			METHOD_PUT, METHOD_LOAD, METHOD_GET_CONTEXT_CLASS_LOADER, METHOD_TEST_AND_APPLY,
 			METHOD_GET_TOP_LEVEL_CLASSES, METHOD_MATCHER, METHOD_TO_LOWER_CASE, METHOD_MATCHES, METHOD_FIND,
 			METHOD_IS_ABSTRACT, METHOD_IS_ASSIGNABLE_FROM, METHOD_TEST_AND_GET, METHOD_TEST_AND_RUN, METHOD_CAST,
-			METHOD_IS_STATIC, METHOD_GET_TEXT, METHOD_SET_TEXT, METHOD_AND, METHOD_SHOW_OPEN_DIALOG,
-			METHOD_GET_NAME_CLASS, METHOD_GET_TYPE, METHOD_TO_URI, METHOD_IS_DIRECTORY = null;
+			METHOD_IS_STATIC, METHOD_GET_TEXT, METHOD_SET_TEXT, METHOD_AND_2BOOLEAN_BOOLEAN_SUPPLIER,
+			METHOD_AND_3BOOLEAN, METHOD_SHOW_OPEN_DIALOG, METHOD_GET_NAME_CLASS, METHOD_GET_TYPE, METHOD_TO_URI,
+			METHOD_IS_DIRECTORY = null;
 
 	@BeforeClass
 	static void beforeClass() throws NoSuchMethodException {
@@ -152,7 +153,10 @@ class Win32DpApiUtilTest {
 		//
 		(METHOD_SET_TEXT = clz.getDeclaredMethod("setText", JTextComponent.class, String.class)).setAccessible(true);
 		//
-		(METHOD_AND = clz.getDeclaredMethod("and", Boolean.TYPE, Boolean.TYPE, BooleanSupplier.class))
+		(METHOD_AND_2BOOLEAN_BOOLEAN_SUPPLIER = clz.getDeclaredMethod("and", Boolean.TYPE, Boolean.TYPE,
+				BooleanSupplier.class)).setAccessible(true);
+		//
+		(METHOD_AND_3BOOLEAN = clz.getDeclaredMethod("and", Boolean.TYPE, Boolean.TYPE, Boolean.TYPE))
 				.setAccessible(true);
 		//
 		(METHOD_SHOW_OPEN_DIALOG = clz.getDeclaredMethod("showOpenDialog", JFileChooser.class, Integer.TYPE))
@@ -983,7 +987,13 @@ class Win32DpApiUtilTest {
 	@Test
 	void testAnd() throws IllegalAccessException, InvocationTargetException {
 		//
-		Assert.assertEquals(invoke(METHOD_AND, null, Boolean.TRUE, Boolean.TRUE, null), Boolean.FALSE);
+		Assert.assertEquals(invoke(METHOD_AND_3BOOLEAN, null, Boolean.TRUE, Boolean.FALSE, Boolean.TRUE),
+				Boolean.FALSE);
+		//
+		Assert.assertEquals(invoke(METHOD_AND_3BOOLEAN, null, Boolean.TRUE, Boolean.TRUE, Boolean.TRUE), Boolean.TRUE);
+		//
+		Assert.assertEquals(invoke(METHOD_AND_2BOOLEAN_BOOLEAN_SUPPLIER, null, Boolean.TRUE, Boolean.TRUE, null),
+				Boolean.FALSE);
 		//
 		if ((ih = ObjectUtils.getIfNull(ih, IH::new)) != null) {
 			//
@@ -993,7 +1003,9 @@ class Win32DpApiUtilTest {
 			//
 		final BooleanSupplier booleanSupplier = Reflection.newProxy(BooleanSupplier.class, ih);
 		//
-		Assert.assertEquals(invoke(METHOD_AND, null, Boolean.TRUE, Boolean.TRUE, booleanSupplier), Boolean.FALSE);
+		Assert.assertEquals(
+				invoke(METHOD_AND_2BOOLEAN_BOOLEAN_SUPPLIER, null, Boolean.TRUE, Boolean.TRUE, booleanSupplier),
+				Boolean.FALSE);
 		//
 		if (ih != null) {
 			//
@@ -1001,7 +1013,9 @@ class Win32DpApiUtilTest {
 			//
 		} // if
 			//
-		Assert.assertEquals(invoke(METHOD_AND, null, Boolean.TRUE, Boolean.TRUE, booleanSupplier), Boolean.TRUE);
+		Assert.assertEquals(
+				invoke(METHOD_AND_2BOOLEAN_BOOLEAN_SUPPLIER, null, Boolean.TRUE, Boolean.TRUE, booleanSupplier),
+				Boolean.TRUE);
 		//
 	}
 

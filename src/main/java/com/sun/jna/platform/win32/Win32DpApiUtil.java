@@ -1690,8 +1690,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // if
 				//
-			if (Boolean.logicalAnd(and(file, Win32DpApiUtil::exists, Win32DpApiUtil::isDirectory),
-					!GraphicsEnvironment.isHeadless()) && !isTestMode()) {
+			if (and(and(file, Win32DpApiUtil::exists, Win32DpApiUtil::isDirectory), !GraphicsEnvironment.isHeadless(),
+					!isTestMode())) {
 				//
 				browse(Desktop.getDesktop(), toURI(file));
 				//
@@ -1707,8 +1707,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 				//
 			} // if
 				//
-			if (Boolean.logicalAnd(and(file, Win32DpApiUtil::exists, Win32DpApiUtil::isDirectory),
-					!GraphicsEnvironment.isHeadless()) && !isTestMode()) {
+			if (and(and(file, Win32DpApiUtil::exists, Win32DpApiUtil::isDirectory), !GraphicsEnvironment.isHeadless(),
+					!isTestMode())) {
 				//
 				browse(Desktop.getDesktop(), toURI(file));
 				//
@@ -1775,6 +1775,10 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 
 	private static File getSelectedFile(final JFileChooser instance) {
 		return instance != null ? instance.getSelectedFile() : null;
+	}
+
+	private static boolean and(final boolean a, final boolean b, final boolean c) {
+		return a && b && c;
 	}
 
 	private static boolean and(final boolean a, final boolean b, final BooleanSupplier booleanSupplier) {
