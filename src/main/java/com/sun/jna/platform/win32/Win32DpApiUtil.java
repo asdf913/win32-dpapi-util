@@ -545,23 +545,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 						filter(stream(
 								testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
 								x -> isAssignableFrom(ComboBoxModel.class, getType(x))),
-						x -> cast(ComboBoxModel.class, Narcissus.getField(instance, x))), x -> {
-							//
-							boolean found = false;
-							//
-							for (int i = 0; i < getSize(x); i++) {
-								//
-								if (Objects.equals(getElementAt(x, i), BASE64) && (found = true)) {
-									//
-									break;
-									//
-								} // if
-									//
-							} // for
-								//
-							testAndRun(found, () -> setSelectedItem(x, BASE64));
-							//
-						});
+						x -> cast(ComboBoxModel.class, Narcissus.getField(instance, x))),
+						x -> testAndRun(find(x, BASE64), () -> setSelectedItem(x, BASE64)));
 				//
 			} else {
 				//
@@ -592,6 +577,24 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 		} // if
 			//
 		perform(map);
+		//
+	}
+
+	private static boolean find(final ComboBoxModel<?> instance, final Object selectedItem) {
+		//
+		boolean found = false;
+		//
+		for (int i = 0; i < getSize(instance); i++) {
+			//
+			if (Objects.equals(getElementAt(instance, i), BASE64) && (found = true)) {
+				//
+				break;
+				//
+			} // if
+				//
+		} // for
+			//
+		return found;
 		//
 	}
 
