@@ -586,7 +586,7 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 		//
 		for (int i = 0; i < getSize(instance); i++) {
 			//
-			if (Objects.equals(getElementAt(instance, i), BASE64) && (found = true)) {
+			if (Objects.equals(getElementAt(instance, i), selectedItem) && (found = true)) {
 				//
 				break;
 				//
