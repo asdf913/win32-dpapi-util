@@ -558,9 +558,9 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 									//
 							} // for
 								//
-							if (found && x != null) {
+							if (found) {
 								//
-								x.setSelectedItem(BASE64);
+								setSelectedItem(x, BASE64);
 								//
 							} // if
 								//
@@ -596,6 +596,12 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 		perform(map);
 		//
+	}
+
+	private static void setSelectedItem(final ComboBoxModel<?> instance, final Object selectedItem) {
+		if (instance != null) {
+			instance.setSelectedItem(selectedItem);
+		}
 	}
 
 	private static void setEnabled(final AbstractButton instance, final boolean enabled) {
