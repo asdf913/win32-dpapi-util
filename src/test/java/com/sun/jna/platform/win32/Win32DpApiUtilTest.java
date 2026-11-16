@@ -45,6 +45,7 @@ import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.JLabel;
 import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.text.JTextComponent;
 
 import org.apache.commons.codec.BinaryEncoder;
@@ -180,7 +181,7 @@ class Win32DpApiUtilTest {
 
 		private Boolean test, containsKey, getAsBoolean, value, isAnnotationPresent = null;
 
-		private Integer modifiers = null;
+		private Integer modifiers, size = null;
 
 		@Override
 		public Object invoke(final Object proxy, final Method method, final Object[] args) throws Throwable {
@@ -280,6 +281,18 @@ class Win32DpApiUtilTest {
 					return isAnnotationPresent;
 					//
 				} else if (Objects.equals(name, "getAnnotation")) {
+					//
+					return null;
+					//
+				} // if
+					//
+			} else if (proxy instanceof ListModel) {
+				//
+				if (Objects.equals(name, "getSize")) {
+					//
+					return size;
+					//
+				} else if (Objects.equals(name, "getElementAt")) {
 					//
 					return null;
 					//
@@ -846,8 +859,7 @@ class Win32DpApiUtilTest {
 			//
 		} // if
 			//
-		Assert.assertNull(
-				invoke(METHOD_TEST_AND_ACCEPT3, null, Reflection.newProxy(Predicate.class, ih), null, null));
+		Assert.assertNull(invoke(METHOD_TEST_AND_ACCEPT3, null, Reflection.newProxy(Predicate.class, ih), null, null));
 		//
 		Assert.assertNull(
 				invoke(METHOD_TEST_AND_ACCEPT4, null, Reflection.newProxy(BiPredicate.class, ih), null, null, null));

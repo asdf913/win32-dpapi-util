@@ -66,6 +66,7 @@ import javax.swing.JLabel;
 import javax.swing.JPanel;
 import javax.swing.JTabbedPane;
 import javax.swing.JTextField;
+import javax.swing.ListModel;
 import javax.swing.WindowConstants;
 import javax.swing.text.JTextComponent;
 
@@ -548,9 +549,9 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 							//
 							boolean found = false;
 							//
-							for (int i = 0; x != null && i < x.getSize(); i++) {
+							for (int i = 0; i < getSize(x); i++) {
 								//
-								if (Objects.equals(x.getElementAt(i), BASE64) && (found = true)) {
+								if (Objects.equals(getElementAt(x, i), BASE64) && (found = true)) {
 									//
 									break;
 									//
@@ -592,6 +593,14 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 			//
 		perform(map);
 		//
+	}
+
+	private static <E> E getElementAt(final ListModel<E> instance, final int index) {
+		return instance != null ? instance.getElementAt(index) : null;
+	}
+
+	private static int getSize(final ListModel<?> instance) {
+		return instance != null ? instance.getSize() : 0;
 	}
 
 	private static void setSelectedItem(final ComboBoxModel<?> instance, final Object selectedItem) {
