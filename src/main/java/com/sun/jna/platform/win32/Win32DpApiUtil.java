@@ -540,6 +540,32 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 						instance.btnCryptUnprotectCopyOutput, instance.btnCryptUnprotectBrowseOutputFile),
 						x -> setEnabled(x, false));
 				//
+				forEach(map(
+						filter(stream(
+								testAndApply(Objects::nonNull, getClass(instance), FieldUtils::getAllFieldsList, null)),
+								x -> isAssignableFrom(ComboBoxModel.class, getType(x))),
+						x -> cast(ComboBoxModel.class, Narcissus.getField(instance, x))), x -> {
+							//
+							boolean found = false;
+							//
+							for (int i = 0; x != null && i < x.getSize(); i++) {
+								//
+								if (Objects.equals(x.getElementAt(i), BASE64) && (found = true)) {
+									//
+									break;
+									//
+								} // if
+									//
+							} // for
+								//
+							if (found && x != null) {
+								//
+								x.setSelectedItem(BASE64);
+								//
+							} // if
+								//
+						});
+				//
 			} else {
 				//
 				instance.add(new JLabel(message));
