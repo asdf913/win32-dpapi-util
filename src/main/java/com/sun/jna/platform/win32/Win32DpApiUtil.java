@@ -558,12 +558,8 @@ public class Win32DpApiUtil extends JPanel implements ActionListener {
 									//
 							} // for
 								//
-							if (found) {
-								//
-								setSelectedItem(x, BASE64);
-								//
-							} // if
-								//
+							testAndRun(found, () -> setSelectedItem(x, BASE64));
+							//
 						});
 				//
 			} else {
